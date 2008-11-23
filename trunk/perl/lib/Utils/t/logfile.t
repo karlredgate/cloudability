@@ -8,6 +8,6 @@ use Utils::LogFile;
 my $log_file = Utils::LogFile->new("$ENV{LOGS_DIR}/test");
 my $time = time();
 $log_file->info("Testing that time is $time");
-is($log_file->grep("Testing that time is $time"), 1, 'Wrote info then grepped it');
+is ($log_file->grep("Testing that time is $time"), 1, 'Wrote info then grepped it');
 
 __END__
