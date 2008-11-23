@@ -3,8 +3,8 @@
 use warnings;
 use Sys::Hostname;
 
-$ENV{DB_USER}         = 'cloudability';
-$ENV{DB_PASSWORD}     = 'password';
+$ENV{DB_USER}         = 'root';
+$ENV{DB_PASSWORD}     = '';
 $ENV{DB_DATABASE}     = 'c10y';
 $ENV{HOSTNAME}        = hostname();
 $ENV{LOGGING_LEVEL}   ||= 2; # info and above
