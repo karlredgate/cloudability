@@ -1,0 +1,26 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use Expect;
+
+my $user = shift or die "usage: $0 USER:GROUP password";
+my $password = shift or die "usage: $0 user:group PASSWORD";
+my $group = $user; $group = $1 if $user =~ s/:(\w+)$//;
+my $timeout = 5;
+
+system "addgroup $group";
+system "useradd -s /bin/bash -d /home/$user -g $group $user";
+system "mkdir /home/$user";
+system "chown $user:$group /home/$user";
+
+my $exp = new Expect;
+$exp->spawn("passwd $user");
+$exp->expect($timeout,
+            [qr/password: /i, sub { my $self = shift;
+                                    $self->send("$password\n");
+                                    exp_continue; }],
+            );
+$exp->soft_close();
+
+__END__

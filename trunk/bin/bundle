@@ -1,0 +1,39 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+# Get the version number of the latest bundle
+
+my $version = shift or die "usage: $0 VERSION";
+$version = sprintf "%02d", $version;
+
+# Don't leave our AWS secrets lying around in /root !
+
+system "mv .awssecret /mnt" if -f '/root/.awssecret';
+
+# Check that we have a certificate and key in /mnt
+
+opendir (MNT, "/mnt");
+my @files = grep /^[^\.]/, readdir(MNT);
+closedir MNT;
+die "no private key file in /mnt" unless grep /^pk-/, @files;
+die "no certificate file in /mnt" unless grep /^cert-/, @files;
+
+# Create a new bundle with a manifest file in /mnt
+
+system "ec2-bundle-vol -d /mnt -k /mnt/pk-*.pem -c /mnt/cert-*.pem -u 992046831893 -r i386 -p cloudability-$version";
+
+# Upload the new bundle
+
+open (KEYS, "/mnt/.awssecret");
+my $access_key = <KEYS>; chomp $access_key;
+my $secret_key = <KEYS>; chomp $secret_key;
+close KEYS;
+system "ec2-upload-bundle -b cloudability-images -m /mnt/cloudability-$version.manifest.xml -a $access_key -s $secret_key";
+
+# Register the new bundle
+
+system "ec2-register cloudability-images/cloudability-$version.manifest.xml -K /mnt/pk-*.pem -C /mnt/cert-*.pem";
+
+__END__
