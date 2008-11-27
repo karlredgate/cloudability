@@ -52,6 +52,7 @@ use constant FIELDS => {
     privateDnsName  => 'aws_private_dns',
     placement       => 'PARSE',
     ramdiskId       => 'aws_ramdisk_id',
+    reason          => 'aws_term_reason',
     size            => 'aws_size',
     status          => 'aws_status',
     volumeId        => 'aws_volume_id',

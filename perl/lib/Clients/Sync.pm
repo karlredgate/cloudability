@@ -110,9 +110,14 @@ sub parse_aws_command
             my $aws_field = $headers[$i] or next;
             my $field = Constants::AWS::FIELDS->{$aws_field} or die "can't translate AWS field '$aws_field'";
             my $value = $values[$i];
-            $field eq 'PARSE' ? 
-                $self->parse_value($value, $object) :
+            if ($field eq 'PARSE')
+            {
+                $self->parse_value($value, $object);
+            }
+            else
+            {
                 $object->{$field} = $value;
+            }
         }
         push @objects, $object;
     }
@@ -128,6 +133,7 @@ Parse a value made of "A=B C=D E=F" into new object values
 sub parse_value
 {
     my ($self, $value, $object) = @_;
+    return unless $value;
 
     my @field_values = split /\s+/, $value;
     foreach my $field_value (@field_values)
@@ -192,6 +198,7 @@ sub sync_instances
     foreach my $instance (@{$instances})
     {
         $instance->{status} = $instance->{aws_inst_state} eq 'running' ? 'R' : 'T';
+        $instance->{aws_finished_at} = $1 if $instance->{aws_term_reason} =~ /\((.+) GMT\)/;
         my $found = Data::Instance->select('aws_instance_id = ?', $instance->{aws_instance_id});
         if ($found->{id})
         {
