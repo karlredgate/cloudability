@@ -3,6 +3,7 @@
 use warnings;
 use Sys::Hostname;
 
+$ENV{AWS_OWNER_ID}    = '992046831893'; # TODO: Change this to your AWS owner ID
 $ENV{DB_USER}         = 'root';
 $ENV{DB_PASSWORD}     = '';
 $ENV{DB_DATABASE}     = 'c10y';

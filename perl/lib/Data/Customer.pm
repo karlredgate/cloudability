@@ -54,9 +54,9 @@ The customer's contact telephone number
 
 The customer's contact facsimile number
 
-=item vat_number
+=item tax_number
 
-The customer's sales tax number (VAT)
+The customer's sales tax number (e.g. VAT number in Europe)
 
 =item url
 
@@ -104,7 +104,7 @@ sub connect
         $args{host} = $ENV{BACKUP_SERVER};
         $_Connection = $class->SUPER::connect(%args);
     }
-    $class->fields(qw(contact company street1 street2 city country zip_code tel_number fax_number vat_number url email brand));
+    $class->fields(qw(contact company street1 street2 city country zip_code tel_number fax_number tax_number url email brand));
 
     return $_Connection;
 }
@@ -147,7 +147,7 @@ Kevin Hutchinson <kevin.hutchinson@legendum.com>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2008 Legendum, LLC.
+Copyright (c) 2008 Legendum LLC
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License

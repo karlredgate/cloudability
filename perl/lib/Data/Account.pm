@@ -38,9 +38,17 @@ The date the account was first signed up
 
 The end date for the account's subscription
 
-=item realname
+=item name
 
-The account holder's real name
+The account holder's name
+
+=item email
+
+The account holder's email address
+
+=item phone
+
+The account holder's phone number
 
 =item username
 
@@ -49,10 +57,6 @@ The account holder's user name
 =item password
 
 The account holder's password
-
-=item email
-
-The account holder's email address
 
 =item referrer
 
@@ -96,7 +100,7 @@ sub connect
         $args{host} = $ENV{BACKUP_SERVER};
         $_Connection = $class->SUPER::connect(%args);
     }
-    $class->fields(qw(customer_id parent_id status start_date end_date realname username password email referrer comments));
+    $class->fields(qw(customer_id parent_id status start_date end_date name email phone username password referrer comments));
 
     return $_Connection;
 }
@@ -139,7 +143,7 @@ Kevin Hutchinson <kevin.hutchinson@legendum.com>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2008 Legendum, LLC.
+Copyright (c) 2008 Legendum LLC
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License

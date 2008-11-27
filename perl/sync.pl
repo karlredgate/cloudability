@@ -8,14 +8,14 @@ BEGIN {
 }
 
 use lib "$ENV{CLOUDABILITY_HOME}/perl/lib";
-use Client::Sync;
-Client::Sync->new()->sync();
+use Clients::Sync;
+Clients::Sync->new()->syncronize();
 
 __END__
 
 =head1 DEPENDENCIES
 
-Client::Sync
+Clients::Sync
 
 =head1 AUTHOR
 
@@ -23,7 +23,7 @@ Kevin Hutchinson <kevin.hutchinson@legendum.com>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2008 Legendum, LLC.
+Copyright (c) 2008 Legendum LLC
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License

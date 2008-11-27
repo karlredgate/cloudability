@@ -38,6 +38,18 @@ The AWS volume availability zone, for example "us-east-1a"
 
 The AWS volume status, for example "available", "deleting" or "deleted"
 
+=item aws_device
+
+When attached, the device the AWS volume is attached to, e.g. "/dev/sdx"
+
+=item aws_instance_id
+
+When attached, the AWS instance ID to which the AWS volume is attached
+
+=item aws_attached_at
+
+When attached, the date and time the AWS volume was attached to the instance
+
 =item aws_created_at
 
 The AWS date and time the volume was created
@@ -76,7 +88,7 @@ sub connect
         $args{host} = $ENV{BACKUP_SERVER};
         $_Connection = $class->SUPER::connect(%args);
     }
-    $class->fields(qw(account_id aws_volume_id aws_size aws_avail_zone aws_status aws_created_at));
+    $class->fields(qw(account_id aws_volume_id aws_size aws_avail_zone aws_status aws_device aws_instance_id aws_attached_at aws_created_at));
 
     return $_Connection;
 }
@@ -119,7 +131,7 @@ Kevin Hutchinson <kevin.hutchinson@legendum.com>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2008 Legendum, LLC.
+Copyright (c) 2008 Legendum LLC
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License

@@ -1,0 +1,72 @@
+#!/usr/bin/env perl
+
+=head1 NAME
+
+cloudup - Update the Cloudability code from the Subversion code repository
+
+=head1 SYNOPSIS
+
+Use this program to update the Cloudability code to the latest version.
+
+cloudup [-revision=R]
+
+ Options:
+  -revision       optional revision version number
+  -help or -?     display this help message
+
+=head1 DESCRIPTION
+
+B<cloudup> updates the Cloudability code to the latest version
+
+=cut
+
+use strict;
+
+BEGIN {
+    $ENV{CLOUDABILITY_HOME} ||= $ENV{HOME} . '/cloudability';
+    require "$ENV{CLOUDABILITY_HOME}/perl/env.pl";
+}
+
+use lib "$ENV{CLOUDABILITY_HOME}/perl/lib";
+use Getopt::Long;
+use Pod::Usage;
+
+# Get the optional revision version number
+
+my ($revision, $help);
+GetOptions("revision:i" => \$revision,
+           "help|?"     => \$help) or pod2usage(2);
+pod2usage(1) if $help;
+
+# Update the Cloudability code, preserving env.pl and notify.txt
+
+system "mv $ENV{CLOUDABILITY_HOME}/perl/env.pl /tmp/env.pl";
+system "mv $ENV{CLOUDABILITY_HOME}/monitor/notify.txt /tmp/notify.txt";
+$revision = $revision ? "-r $revision" : '';
+system "/usr/bin/svn update $revision $ENV{CLOUDABILITY_HOME}";
+system "mv /tmp/env.pl $ENV{CLOUDABILITY_HOME}/perl/env.pl";
+system "mv /tmp/notify.txt $ENV{CLOUDABILITY_HOME}/monitor/notify.txt";
+
+__END__
+
+=head1 DEPENDENCIES
+
+Getopt::Long, Pod::Usage
+
+=head1 AUTHOR
+
+Kevin Hutchinson (kevin.hutchinson@legendum.com)
+
+=head1 COPYRIGHT
+
+Copyright (c) 2008 Legendum LLC
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 3
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.

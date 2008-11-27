@@ -42,6 +42,10 @@ The AWS ramdisk ID
 
 The AWS instance state
 
+=item aws_inst_type
+
+The AWS instance type (e.g. "m1.small")
+
 =item aws_avail_zone
 
 The AWS availability zone (placement)
@@ -108,7 +112,7 @@ sub connect
         $args{host} = $ENV{BACKUP_SERVER};
         $_Connection = $class->SUPER::connect(%args);
     }
-    $class->fields(qw(account_id aws_instance_id aws_image_id aws_kernel_id aws_ramdisk_id aws_inst_state aws_avail_zone aws_key_name aws_public_dns aws_private_dns aws_started_at aws_finished_at aws_term_reason status));
+    $class->fields(qw(account_id aws_instance_id aws_image_id aws_kernel_id aws_ramdisk_id aws_inst_state aws_inst_type aws_avail_zone aws_key_name aws_public_dns aws_private_dns aws_started_at aws_finished_at aws_term_reason status));
 
     return $_Connection;
 }
@@ -133,9 +137,22 @@ sub disconnect
 
 =over 4
 
-=item None
+=item find_by_aws_instance_id($aws_instance_id)
+
+Find an instance in the database by its AWS instance ID
 
 =cut
+sub find_by_aws_instance_id
+{
+    my ($self, $aws_instance_id) = @_;
+    my $class = ref $self || $self;
+
+    $class->connect();
+    my $instance = $class->select('aws_instance_id = ?', $aws_instance_id);
+    $class->disconnect();
+
+    return $instance;
+}
 
 }1;
 
@@ -151,7 +168,7 @@ Kevin Hutchinson <kevin.hutchinson@legendum.com>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2008 Legendum, LLC.
+Copyright (c) 2008 Legendum LLC
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
