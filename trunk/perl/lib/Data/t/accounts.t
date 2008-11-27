@@ -8,15 +8,16 @@ my %object = (
     status      => 'L',
     start_date  => '2008-01-01',
     end_date    => '2008-02-02',
-    realname    => 'realname',
+    name        => 'name',
+    email       => 'email',
+    phone       => 'phone',
     username    => 'username',
     password    => 'password',
-    email       => 'email',
     referrer    => 'referrer',
     comments    => 'comments',
 );
 
-use Test::More tests => 11;
+use Test::More tests => 12;
 use Data::Account;
 Data::Account->connect();
 

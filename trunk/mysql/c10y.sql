@@ -15,7 +15,7 @@ create table if not exists customers
     zip_code        VARCHAR(40),
     tel_number      VARCHAR(40),
     fax_number      VARCHAR(40),
-    vat_number      VARCHAR(40),
+    tax_number      VARCHAR(40),
     url             VARCHAR(40) NOT NULL,
     email           VARCHAR(40) NOT NULL,
     brand           VARCHAR(40) NOT NULL,
@@ -49,6 +49,7 @@ create table if not exists instances
     aws_kernel_id   VARCHAR(255) NOT NULL,
     aws_ramdisk_id  VARCHAR(255) NOT NULL,
     aws_inst_state  VARCHAR(255) NOT NULL,
+    aws_inst_type   VARCHAR(255) NOT NULL,
     aws_avail_zone  VARCHAR(255) NOT NULL,
     aws_key_name    VARCHAR(255) NOT NULL,
     aws_public_dns  VARCHAR(255) NOT NULL,
@@ -71,10 +72,15 @@ create table if not exists volumes
     aws_size        SMALLINT UNSIGNED NOT NULL,
     aws_avail_zone  VARCHAR(255) NOT NULL,
     aws_status      VARCHAR(255) NOT NULL,
+    aws_device      VARCHAR(255),
+    aws_instance_id VARCHAR(255),
+    aws_is_attached ENUM('Y', 'N') NOT NULL,
+    aws_attached_at DATETIME,
     aws_created_at  DATETIME,
 
     KEY             account_id (account_id),
-    KEY             aws_volume_id (aws_volume_id)
+    KEY             aws_volume_id (aws_volume_id),
+    KEY             aws_instance_id (aws_instance_id)
 ) MAX_ROWS = 4294967296;
 
 create table if not exists accounts
@@ -85,10 +91,11 @@ create table if not exists accounts
     status          CHAR(1) NOT NULL DEFAULT 'A',
     start_date      DATE NOT NULL,
     end_date        DATE,
-    realname        VARCHAR(255) NOT NULL,
+    name            VARCHAR(255) NOT NULL,
+    email           VARCHAR(255) NOT NULL,
+    phone           VARCHAR(255) NOT NULL,
     username        VARCHAR(255) NOT NULL,
     password        VARCHAR(255) NOT NULL,
-    email           VARCHAR(255) NOT NULL,
     referrer        MEDIUMTEXT,
     comments        MEDIUMTEXT,
 
