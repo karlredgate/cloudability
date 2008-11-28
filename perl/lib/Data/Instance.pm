@@ -86,10 +86,12 @@ $VERSION = "1.0";
 
 use strict;
 use base 'Data::Object';
+use Constants::AWS;
 {
     # Class static properties
 
     my $_Connection;
+    my $_KNOW_HOST_CMD = "$ENV{CLOUDABILITY_HOME}/bin/knowhost";
 
 =head2 Class Methods
 
@@ -152,6 +154,20 @@ sub find_by_aws_instance_id
     $class->disconnect();
 
     return $instance;
+}
+
+=item know_host()
+
+Make sure we know the instance's host for SSH commands
+
+=cut
+sub know_host
+{
+    my ($self) = @_;
+    return if $self->{status} ne Constants::AWS::STATUS_RUNNING;
+    die "no AWS public DNS host name" unless $self->{aws_public_dns};
+
+    system "$_KNOW_HOST_CMD $ENV{AWS_KEY_FILE} $self->{aws_public_dns}";
 }
 
 }1;

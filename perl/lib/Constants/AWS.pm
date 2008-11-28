@@ -49,6 +49,7 @@ use constant FIELDS => {
     keyName         => 'aws_key_name',
     launchTime      => 'aws_started_at',
     name            => 'aws_inst_state',
+    previousState   => 'aws_prev_state',
     privateDnsName  => 'aws_private_dns',
     placement       => 'PARSE',
     ramdiskId       => 'aws_ramdisk_id',

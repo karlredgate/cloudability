@@ -34,7 +34,7 @@ use Data::Volume;
 {
     # Class static properties
 
-    my $AWS = '/usr/bin/aws';
+    my $_AWS_CMD = '/usr/bin/aws';
 
 =head2 Class Methods
 
@@ -113,7 +113,7 @@ sub parse_aws_command
 {
     my ($self, $cmd, $header) = @_;
 
-    open (AWS, "$AWS $cmd|");
+    open (AWS, "$_AWS_CMD $cmd|");
     my @data = grep /^[^+]/, <AWS>;
     close AWS;
 
@@ -242,8 +242,13 @@ sub sync_instances
         else
         {
             $instance->{account_id} ||= 0;
-            Data::Instance->new(%{$instance})->insert();
+            $found = Data::Instance->new(%{$instance});
+            $found->insert();
         }
+
+        # Make sure we know the instance's host for SSH commands
+
+        $found->know_host();
     }
     Data::Instance->disconnect();
 }

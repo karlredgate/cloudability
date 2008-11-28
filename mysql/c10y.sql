@@ -64,6 +64,16 @@ create table if not exists instances
     KEY             aws_image_id (aws_image_id)
 ) MAX_ROWS = 4294967296;
 
+create table if not exists instance_configs
+(
+    id              INTEGER UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    instance_id     INTEGER UNSIGNED NOT NULL,
+    field           VARCHAR(255) NOT NULL,
+    value           MEDIUMTEXT NOT NULL DEFAULT '',
+
+    KEY             instance_id (instance_id)
+) MAX_ROWS = 4294967296;
+
 create table if not exists volumes
 (
     id              INTEGER UNSIGNED AUTO_INCREMENT PRIMARY KEY,
