@@ -8,14 +8,26 @@ BEGIN {
 }
 
 use lib "$ENV{CLOUDABILITY_HOME}/perl/lib";
-use Clients::Sync;
-Clients::Sync->new()->syncronize();
+use Clients::AWS;
+
+my $aws = Clients::AWS->new();
+my $cmd = join ' ', @ARGV;
+if ($cmd)
+{
+    # Command so run it
+    $aws->command($cmd);
+}
+else
+{
+    # No command so sync
+    $aws->syncronize();
+}
 
 __END__
 
 =head1 DEPENDENCIES
 
-Clients::Sync
+Clients::AWS
 
 =head1 AUTHOR
 

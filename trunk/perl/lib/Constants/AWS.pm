@@ -53,6 +53,7 @@ use constant FIELDS => {
     placement       => 'PARSE',
     ramdiskId       => 'aws_ramdisk_id',
     reason          => 'aws_term_reason',
+    shutdownState   => 'PARSE',
     size            => 'aws_size',
     status          => 'aws_status',
     volumeId        => 'aws_volume_id',
@@ -61,9 +62,17 @@ use constant FIELDS => {
 # Instance, account and account token status values
 
 use constant STATUS_ACTIVE          => 'A';
+use constant STATUS_PENDING         => 'P';
 use constant STATUS_RUNNING         => 'R';
 use constant STATUS_SUSPENDED       => 'S';
 use constant STATUS_TERMINATED      => 'T';
+use constant STATUS_UNKNOWN         => 'U';
+
+use constant STATES => {
+    pending         => Constants::AWS::STATUS_PENDING,
+    running         => Constants::AWS::STATUS_RUNNING,
+    terminated      => Constants::AWS::STATUS_TERMINATED,
+};
 
 =back
 

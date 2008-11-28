@@ -21,6 +21,7 @@ B<cloudup> updates the Cloudability code to the latest version
 =cut
 
 use strict;
+use warnings;
 
 BEGIN {
     $ENV{CLOUDABILITY_HOME} ||= $ENV{HOME} . '/cloudability';
@@ -51,7 +52,7 @@ __END__
 
 =head1 DEPENDENCIES
 
-Getopt::Long, Pod::Usage
+Getopt::Long, Pod::Usage and the Ubuntu Linux program "svn" (Subversion)
 
 =head1 AUTHOR
 

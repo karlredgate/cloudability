@@ -1,0 +1,76 @@
+#!/usr/bin/env perl
+
+=head1 NAME
+
+knowhost - Make sure that a particular running host is known to SSH
+
+=head1 SYNOPSIS
+
+Use this program to make a particular running host known to SSH.
+
+knowhost KEY HOST
+
+ Options:
+  KEY             the key file (normally in ~/.ssh ending in ".pem")
+  HOST            the host name
+
+=head1 DESCRIPTION
+
+B<knowhost> makes a particular running host known to SSH
+
+=cut
+
+use strict;
+use warnings;
+use Expect;
+
+my $key = shift or die "usage: $0 KEY host";
+my $host = shift or die "usage: $0 key HOST";
+my $timeout = 5;
+
+# Check to see if the host is known
+
+open (KNOWN_HOSTS, '~/.ssh/known_hosts');
+exit 0 if grep /^$host,/, <KNOWN_HOSTS>;
+close KNOWN_HOSTS;
+
+# Not known so log in with "expect"
+
+my $exp = new Expect;
+$exp->spawn("ssh -i $key root\@$host");
+$exp->expect($timeout,
+            # Are you sure you want to connect?
+            [qr/yes\/no/i, sub { my $self = shift;
+                                    $self->send("yes\n");
+                                    exp_continue; }],
+
+            # Root prompt so exit
+            [qr/# /i, sub { my $self = shift;
+                               $self->send("exit\n");
+                               exp_continue; }],
+            );
+$exp->soft_close();
+
+__END__
+
+=head1 DEPENDENCIES
+
+Expect
+
+=head1 AUTHOR
+
+Kevin Hutchinson <kevin.hutchinson@legendum.com>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2008 Legendum LLC
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 3
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
