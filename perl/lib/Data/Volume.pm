@@ -113,9 +113,22 @@ sub disconnect
 
 =over 4
 
-=item None
+=item find_by_aws_volume_id($aws_volume_id)
+
+Find a volume in the database by its AWS volume ID
 
 =cut
+sub find_by_aws_volume_id
+{
+    my ($self, $aws_volume_id) = @_;
+    my $class = ref $self || $self;
+
+    $class->connect();
+    my $volume = $class->select('aws_volume_id = ?', $aws_volume_id);
+    #$class->disconnect();
+
+    return $volume;
+}
 
 }1;
 

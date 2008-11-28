@@ -151,7 +151,7 @@ sub find_by_aws_instance_id
 
     $class->connect();
     my $instance = $class->select('aws_instance_id = ?', $aws_instance_id);
-    $class->disconnect();
+    #$class->disconnect();
 
     return $instance;
 }
