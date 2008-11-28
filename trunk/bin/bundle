@@ -30,7 +30,8 @@ $version = sprintf "%02d", $version;
 
 # Don't leave our AWS secrets lying around in /root !
 
-system "mv .awssecret /mnt" if -f '/root/.awssecret';
+system "mv /root/.awssecret /mnt" if -f '/root/.awssecret';
+die "no /mnt/.awssecret file" unless -f "/mnt/.awssecret";
 
 # Check that we have a certificate and key in /mnt
 
