@@ -1,0 +1,66 @@
+#!/usr/bin/env perl
+
+=head1 NAME
+
+numbers - Look for "[0-n]" in a command line and run the command for each
+          number in the range - useful for running "aws rm" to delete stuff.
+
+=head1 SYNOPSIS
+
+Use this program to find "[0-n]" in a command line and run the command one
+time for each of the numbers in the range. This saves time with "aws rm".
+
+numbers CMD
+
+ Options:
+  CMD             the command containing "[0-n]" somewhere inside it
+
+=head1 DESCRIPTION
+
+B<numbers> finds "[0-n]" in a command line and runs the command many times
+
+=cut
+
+use strict;
+use warnings;
+
+my $cmd = join ' ', @ARGV;
+die "usage: $0 COMMAND" unless $cmd;
+
+my ($from, $to) = (0, 0);
+($from, $to) = ($1, $2) if $cmd =~ s/\[(\d+)-(\d+)\]/[RANGE]/;
+if ($to)
+{
+    my $length = length $from;
+    for (my $i = $from; $i <= $to; $i++)
+    {
+        $i = sprintf("%0${length}d", $i);
+        my $run = $cmd;
+        $run =~ s/\[RANGE\]/$i/;
+        system $run;
+    }
+}
+
+__END__
+
+=head1 DEPENDENCIES
+
+None
+
+=head1 AUTHOR
+
+Kevin Hutchinson <kevin.hutchinson@legendum.com>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2008 Legendum LLC
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 3
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.

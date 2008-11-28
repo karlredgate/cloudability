@@ -57,6 +57,7 @@ sub new
 
     my $self = {
         aws_owner_id    => $aws_owner_id,
+        account_id      => 0, # see the command() method below
         log_file        => Utils::LogFile->new("$ENV{LOGS_DIR}/aws"),
     };
     $self->{log_file}->alert("Starting for owner $aws_owner_id");
@@ -72,16 +73,17 @@ sub new
 
 =over 4
 
-=item command()
+=item command($cmd, [$account_id])
 
 Run an AWS command and parse the results
 
 =cut
 sub command
 {
-    my ($self, $cmd) = @_;
+    my ($self, $cmd, $account_id) = @_;
     die "bad command \"$cmd\"" if $cmd =~ /;&&|\||\`/;
     $self->{log_file}->info("Command $cmd");
+    $self->{account_id} = $account_id || 0;
 
     if ($cmd =~ /^(run|run-instances?|tin|terminate-instances?)/)
     {
@@ -273,7 +275,7 @@ sub sync_instances
         }
         else
         {
-            $instance->{account_id} ||= 0;
+            $instance->{account_id} = $self->{account_id} || 0;
             $found = Data::Instance->new(%{$instance});
             $found->insert();
         }
@@ -306,7 +308,7 @@ sub sync_snapshots
         else
         {
             my $volume = Data::Volume->find_by_aws_volume_id($snapshot->{aws_volume_id});
-            $snapshot->{account_id} = $volume->{account_id} || 0;
+            $snapshot->{account_id} = $self->{account_id} || $volume->{account_id} || 0;
             Data::Snapshot->new(%{$snapshot})->insert();
         }
     }
@@ -334,7 +336,7 @@ sub sync_volumes
         else
         {
             my $instance = Data::Instance->find_by_aws_instance_id($volume->{aws_instance_id});
-            $volume->{account_id} = $instance->{account_id} || 0;
+            $volume->{account_id} = $self->{account_id} || $instance->{account_id} || 0;
             Data::Volume->new(%{$volume})->insert();
         }
     }
