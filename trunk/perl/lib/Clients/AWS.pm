@@ -31,6 +31,7 @@ use Constants::AWS;
 use Data::Image;
 use Data::Instance;
 use Data::Volume;
+use Utils::LogFile;
 {
     # Class static properties
 
@@ -54,8 +55,10 @@ sub new
     # Make a new Clients::AWS object
 
     my $self = {
-        aws_owner_id => $aws_owner_id,
+        aws_owner_id    => $aws_owner_id,
+        log_file        => Utils::LogFile->new("$ENV{LOGS_DIR}/aws"),
     };
+    $self->{log_file}->alert("Starting for owner $aws_owner_id");
 
     # Return the new Clients::AWS object
 
@@ -77,11 +80,17 @@ sub command
 {
     my ($self, $cmd) = @_;
     die "bad command \"$cmd\"" if $cmd =~ /;&&|\||\`/;
+    $self->{log_file}->info("Command $cmd");
 
     if ($cmd =~ /^(run|run-instances?|tin|terminate-instances?)/)
     {
         my $instances = $self->parse_aws_command($cmd, 'instanceId');
         $self->sync_instances($instances);
+    }
+    elsif ($cmd =~ /^(attvol|attach-volume|detvol|detach-volume)/)
+    {
+        my $volumes = $self->parse_aws_command($cmd, 'volumeId');
+        $self->sync_volumes($volumes);
     }
 }
 
@@ -93,6 +102,7 @@ Syncronize the Cloudability database with Amazon AWS information
 sub syncronize
 {
     my ($self) = @_;
+    $self->{log_file}->info("Syncronizing images, instances and volumes");
 
     my $images = $self->parse_aws_command('dim -o ' . $self->{aws_owner_id});
     $self->sync_images($images);
@@ -287,7 +297,7 @@ sub sync_volumes
 
 =head1 DEPENDENCIES
 
-Data::Image, Data::Instance, Data::Volume
+Constants::AWS, Data::Image, Data::Instance, Data::Volume, Utils::LogFile
 
 =head1 AUTHOR
 
