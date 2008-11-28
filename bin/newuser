@@ -8,7 +8,7 @@ newuser - Add a new user (and group) and copy essential files for the user.
 
 Use this program to add a new user and group with essential files copied.
 
-knowhost USER[:GROUP]
+newuser USER[:GROUP]
 
  Options:
   USER[:GROUP]    the new username to add (and optionally its group name)
