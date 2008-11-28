@@ -22,6 +22,7 @@ B<knowhost> makes a particular running host known to SSH
 
 use strict;
 use warnings;
+
 use Expect;
 
 my $key = shift or die "usage: $0 KEY host";
@@ -30,9 +31,13 @@ my $timeout = 5;
 
 # Check to see if the host is known
 
-open (KNOWN_HOSTS, '~/.ssh/known_hosts');
-exit 0 if grep /^$host,/, <KNOWN_HOSTS>;
-close KNOWN_HOSTS;
+my $known_hosts_file = "$ENV{HOME}/.ssh/known_hosts";
+if (-f $known_hosts_file)
+{
+    open (KNOWN_HOSTS, $known_hosts_file);
+    exit 0 if grep /^$host,/, <KNOWN_HOSTS>;
+    close KNOWN_HOSTS;
+}
 
 # Not known so log in with "expect"
 
