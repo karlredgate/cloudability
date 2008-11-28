@@ -93,6 +93,21 @@ create table if not exists volumes
     KEY             aws_instance_id (aws_instance_id)
 ) MAX_ROWS = 4294967296;
 
+create table if not exists snapshots
+(
+    id              INTEGER UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    account_id      INTEGER UNSIGNED NOT NULL,
+    aws_snapshot_id VARCHAR(255) NOT NULL,
+    aws_volume_id   VARCHAR(255) NOT NULL,
+    aws_status      VARCHAR(255) NOT NULL,
+    aws_started_at  DATETIME,
+    aws_progress    VARCHAR(255),
+
+    KEY             account_id (account_id),
+    KEY             aws_volume_id (aws_volume_id),
+    KEY             aws_snapshot_id (aws_snapshot_id)
+) MAX_ROWS = 4294967296;
+
 create table if not exists accounts
 (
     id              INTEGER UNSIGNED AUTO_INCREMENT PRIMARY KEY,

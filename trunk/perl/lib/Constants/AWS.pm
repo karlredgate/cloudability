@@ -52,10 +52,13 @@ use constant FIELDS => {
     previousState   => 'aws_prev_state',
     privateDnsName  => 'aws_private_dns',
     placement       => 'PARSE',
+    progress        => 'aws_progress',
     ramdiskId       => 'aws_ramdisk_id',
     reason          => 'aws_term_reason',
     shutdownState   => 'PARSE',
     size            => 'aws_size',
+    snapshotId      => 'aws_snapshot_id',
+    startTime       => 'aws_started_at',
     status          => 'aws_status',
     volumeId        => 'aws_volume_id',
 };

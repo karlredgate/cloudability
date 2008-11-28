@@ -30,6 +30,7 @@ use strict;
 use Constants::AWS;
 use Data::Image;
 use Data::Instance;
+use Data::Snapshot;
 use Data::Volume;
 use Utils::LogFile;
 {
@@ -87,10 +88,27 @@ sub command
         my $instances = $self->parse_aws_command($cmd, 'instanceId');
         $self->sync_instances($instances);
     }
-    elsif ($cmd =~ /^(attvol|attach-volume|detvol|detach-volume)/)
+    elsif ($cmd =~ /^(csnap|create-snapshot)/)
+    {
+        my $snapshots = $self->parse_aws_command($cmd, 'snapshotId');
+        $self->sync_snapshots($snapshots);
+    }
+    elsif ($cmd =~ /^(delsnap|delete-snapshot)\s+(\S+)/)
+    {
+        system "$_AWS_CMD $cmd > /dev/null";
+        my $snapshot = Data::Snapshot->find_by_aws_snapshot_id($2);
+        $snapshot->delete() if $snapshot->{id};
+    }
+    elsif ($cmd =~ /^(attvol|attach-volume|cvol|create-volume|detvol|detach-volume)/)
     {
         my $volumes = $self->parse_aws_command($cmd, 'volumeId');
         $self->sync_volumes($volumes);
+    }
+    elsif ($cmd =~ /^(delvol|delete-volume)\s+(\S+)/)
+    {
+        system "$_AWS_CMD $cmd > /dev/null";
+        my $volume = Data::Volume->find_by_aws_volume_id($2);
+        $volume->delete() if $volume->{id};
     }
 }
 
@@ -109,6 +127,9 @@ sub syncronize
 
     my $instances = $self->parse_aws_command('din', 'instanceId');
     $self->sync_instances($instances);
+
+    my $snapshots = $self->parse_aws_command('dsnap', 'snapshotId');
+    $self->sync_snapshots($snapshots);
 
     my $volumes = $self->parse_aws_command('dvol', 'volumeId');
     $self->sync_volumes($volumes);
@@ -130,6 +151,7 @@ sub parse_aws_command
     # Parse the first line as a header line always
 
     my $headers = shift @data;
+    return if $headers =~ /^<\?xml/; #no rows
     my @headers = split /\s*\|\s*/, $headers;
     my @objects = ();
     foreach my $values (@data)
@@ -263,6 +285,34 @@ sub sync_instances
     Data::Instance->disconnect();
 }
 
+=item sync_snapshots($snapshots)
+
+Syncronize a list of snapshots with the database
+
+=cut
+sub sync_snapshots
+{
+    my ($self, $snapshots) = @_;
+
+    Data::Snapshot->connect();
+    foreach my $snapshot (@{$snapshots})
+    {
+        my $found = Data::Snapshot->select('aws_snapshot_id = ?', $snapshot->{aws_snapshot_id});
+        if ($found->{id})
+        {
+            $self->copy_object($snapshot, $found);
+            $found->update();
+        }
+        else
+        {
+            my $volume = Data::Volume->find_by_aws_volume_id($snapshot->{aws_volume_id});
+            $snapshot->{account_id} = $volume->{account_id} || 0;
+            Data::Snapshot->new(%{$snapshot})->insert();
+        }
+    }
+    Data::Snapshot->disconnect();
+}
+
 =item sync_volumes($volumes)
 
 Syncronize a list of volumes with the database
@@ -297,7 +347,7 @@ sub sync_volumes
 
 =head1 DEPENDENCIES
 
-Constants::AWS, Data::Image, Data::Instance, Data::Volume, Utils::LogFile
+Constants::AWS, Data::Image, Data::Instance, Data::Snapshot, Data::Volume, Utils::LogFile
 
 =head1 AUTHOR
 
