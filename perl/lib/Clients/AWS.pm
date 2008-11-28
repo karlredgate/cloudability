@@ -2,15 +2,17 @@
 
 =head1 NAME
 
-Clients::Sync - Syncronize the Cloudability database with AWS information
+Clients::AWS -  Syncronize the Cloudability database with AWS information
+                and run AWS commands to manage AWS resources (start/stop).
 
 =head1 VERSION
 
-This document refers to version 1.0 of Clients::Sync, released Nov 26, 2008
+This document refers to version 1.0 of Clients::AWS, released Nov 26, 2008
 
 =head1 DESCRIPTION
 
-Clients::Sync syncronizes the Cloudability database with AWS information
+Clients::AWS syncronizes the Cloudability database with AWS information
+and runs AWS commands to manage AWS system resources (e.g. start/stop).
 
 =head2 Properties
 
@@ -21,7 +23,7 @@ None
 =back
 
 =cut
-package Clients::Sync;
+package Clients::AWS;
 $VERSION = "1.0";
 
 use strict;
@@ -40,7 +42,7 @@ use Data::Volume;
 
 =item new($aws_owner_id)
 
-Create a new Clients::Sync object for an Amazon AWS owner ID (e.g. 992046831893)
+Create a new Clients::AWS object for an Amazon AWS owner ID (e.g. 992046831893)
 
 =cut
 sub new
@@ -49,13 +51,13 @@ sub new
     $aws_owner_id ||= $ENV{AWS_OWNER_ID};
     die "no AWS owner ID specified" unless $aws_owner_id;
 
-    # Make a new Clients::Sync object
+    # Make a new Clients::AWS object
 
     my $self = {
         aws_owner_id => $aws_owner_id,
     };
 
-    # Return the new Clients::Sync object
+    # Return the new Clients::AWS object
 
     bless $self, $class;
 }
@@ -66,6 +68,23 @@ sub new
 
 =over 4
 
+=item command()
+
+Run an AWS command and parse the results
+
+=cut
+sub command
+{
+    my ($self, $cmd) = @_;
+    die "bad command \"$cmd\"" if $cmd =~ /;&&|\||\`/;
+
+    if ($cmd =~ /^(run|run-instances?|tin|terminate-instances?)/)
+    {
+        my $instances = $self->parse_aws_command($cmd, 'instanceId');
+        $self->sync_instances($instances);
+    }
+}
+
 =item syncronize()
 
 Syncronize the Cloudability database with Amazon AWS information
@@ -73,30 +92,32 @@ Syncronize the Cloudability database with Amazon AWS information
 =cut
 sub syncronize
 {
-    my ($self, %args) = @_;
+    my ($self) = @_;
 
-    my $images = $self->parse_aws_command("dim -o " . $self->{aws_owner_id});
+    my $images = $self->parse_aws_command('dim -o ' . $self->{aws_owner_id});
     $self->sync_images($images);
 
-    my $instances = $self->parse_aws_command("din");
+    my $instances = $self->parse_aws_command('din', 'instanceId');
     $self->sync_instances($instances);
 
-    my $volumes = $self->parse_aws_command("dvol");
+    my $volumes = $self->parse_aws_command('dvol', 'volumeId');
     $self->sync_volumes($volumes);
 }
 
-=item parse_aws_command($cmd)
+=item parse_aws_command($cmd, [$header])
 
 Return a sites data structure formatted as JSON
 
 =cut
 sub parse_aws_command
 {
-    my ($self, $cmd) = @_;
+    my ($self, $cmd, $header) = @_;
 
     open (AWS, "$AWS $cmd|");
     my @data = grep /^[^+]/, <AWS>;
     close AWS;
+
+    # Parse the first line as a header line always
 
     my $headers = shift @data;
     my @headers = split /\s*\|\s*/, $headers;
@@ -104,6 +125,17 @@ sub parse_aws_command
     foreach my $values (@data)
     {
         my @values = split /\s*\|\s*/, $values;
+
+        # Some AWS commands return a variety of header line formats
+
+        if ($header eq $values[1])
+        {
+            @headers = @values;
+            next;
+        }
+
+        # Regular values so parse them against the last header line
+
         my $object = {};
         for (my $i = 1; $i < @headers; $i++)
         {
@@ -139,7 +171,7 @@ sub parse_value
     foreach my $field_value (@field_values)
     {
         my ($aws_field, $value) = split /=/, $field_value;
-        my $field = Constants::AWS::FIELDS->{$aws_field} or die "can't translate AWS field '$aws_field'";
+        my $field = Constants::AWS::FIELDS->{$aws_field} or die "can't translate AWS field '$aws_field' in '$field_value'";
         $object->{$field} = $value;
     }
 }
@@ -197,8 +229,10 @@ sub sync_instances
     Data::Instance->connect();
     foreach my $instance (@{$instances})
     {
-        $instance->{status} = $instance->{aws_inst_state} eq 'running' ? 'R' : 'T';
+        $instance->{status} = Constants::AWS::STATES->{$instance->{aws_inst_state}} || Constants::AWS::STATUS_UNKNOWN;
         $instance->{aws_finished_at} = $1 if $instance->{aws_term_reason} =~ /\((.+) GMT\)/;
+        $instance->{aws_public_dns} ||= '';
+        $instance->{aws_private_dns} ||= '';
         my $found = Data::Instance->select('aws_instance_id = ?', $instance->{aws_instance_id});
         if ($found->{id})
         {

@@ -1,26 +1,58 @@
 #!/usr/bin/env perl
 
+=head1 NAME
+
+newuser - Add a new user (and group) and copy essential files for the user.
+
+=head1 SYNOPSIS
+
+Use this program to add a new user and group with essential files copied.
+
+knowhost USER[:GROUP]
+
+ Options:
+  USER[:GROUP]    the new username to add (and optionally its group name)
+
+=head1 DESCRIPTION
+
+B<newuser> adds a new user (and group) and copies any essential files
+
+=cut
+
 use strict;
 use warnings;
-use Expect;
 
-my $user = shift or die "usage: $0 USER:GROUP password";
-my $password = shift or die "usage: $0 user:group PASSWORD";
+my $user = shift or die "usage: $0 USER[:GROUP]";
 my $group = $user; $group = $1 if $user =~ s/:(\w+)$//;
-my $timeout = 5;
+my $user_ssh_dir = "/home/$user/.ssh";
 
 system "addgroup $group";
 system "useradd -s /bin/bash -d /home/$user -g $group $user";
-system "mkdir /home/$user";
-system "chown $user:$group /home/$user";
-
-my $exp = new Expect;
-$exp->spawn("passwd $user");
-$exp->expect($timeout,
-            [qr/password: /i, sub { my $self = shift;
-                                    $self->send("$password\n");
-                                    exp_continue; }],
-            );
-$exp->soft_close();
+system "mkdir -p $user_ssh_dir";
+system "chmod 700 $user_ssh_dir";
+system "cp ~/.ssh/authorized_keys $user_ssh_dir";
+system "chown -R $user:$group /home/$user";
 
 __END__
+
+=head1 DEPENDENCIES
+
+Ubuntu Linux programs "addgroup", "useradd", "mkdir", "chmod", "cp" and "chown"
+
+=head1 AUTHOR
+
+Kevin Hutchinson <kevin.hutchinson@legendum.com>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2008 Legendum LLC
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 3
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
