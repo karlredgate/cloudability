@@ -110,7 +110,7 @@ create table if not exists accounts
     comments        MEDIUMTEXT,
 
     KEY             parent_id (parent_id),
-    KEY             username (username)
+    KEY             name (name)
 ) MAX_ROWS = 4294967296;
 
 create table if not exists account_configs
