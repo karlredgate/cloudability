@@ -1,0 +1,150 @@
+#!/usr/bin/env perl
+
+=head1 NAME
+
+setup - set up a new Cloudability system with a new system administrator
+
+=head1 SYNOPSIS
+
+Use this program to set up a new Cloudability system with an administrator.
+
+setup
+
+ Options: None
+
+=head1 DESCRIPTION
+
+B<setup> sets up a new Cloudability system with a new system administrator
+
+=cut
+
+use strict;
+use warnings;
+
+BEGIN {
+    $ENV{CLOUDABILITY_HOME} ||= $ENV{HOME} . '/cloudability';
+    require "$ENV{CLOUDABILITY_HOME}/perl/env.pl";
+}
+
+use lib "$ENV{CLOUDABILITY_HOME}/perl/lib";
+use Term::ReadLine;
+use Data::Customer;
+use Data::Account;
+use Utils::Time;
+
+use constant REQUIRED => 1;
+
+# Let's make it look pretty...
+
+my $term = new Term::ReadLine;
+
+# A simple function to ask for some info
+
+sub ask_for
+{
+    my ($prompt, $required) = @_;
+    $prompt .= $required ? ': ' : ' (opt): ';
+    my $answer = $term->readline($prompt);
+    $answer = $term->readline($prompt) while !$answer && $required;
+    $answer =~ s/^\s+//;
+    $answer =~ s/\s+$//;
+    return $answer;
+}
+
+# Get setup info from the user's command line
+
+print "Please provide some info to set up your Cloudability system.\n";
+print "There are 20 questions and some are optional, i.e. with (opt).\n";
+my $cust_contact = ask_for "Customer contact person, e.g. Bill Smith", REQUIRED;
+my $cust_name = ask_for "Customer company name, e.g. Acme Inc.", REQUIRED;
+my $cust_street1 = ask_for "Customer's street address (first line)";
+my $cust_street2 = ask_for "Customer's street address (second line)";
+my $cust_city = ask_for "Customer's city";
+my $cust_country = ask_for "Customer's country";
+my $cust_zip_code = ask_for "Customer's zip (postal) code";
+my $cust_tel_number = ask_for "Customer's phone number";
+my $cust_fax_number = ask_for "Customer's fax number";
+my $cust_tax_number = ask_for "Customer's tax number";
+my $cust_url = ask_for "Customer's web site address (URL)";
+my $cust_email = ask_for "Customer's main email address";
+my $cust_brand = ask_for "Customer's brand name";
+my $cust_aws_access_key = ask_for "Amazon AWS access key";
+my $cust_aws_secret_key = ask_for "Amazon AWS secret access key";
+my $cust_aws_account_num = ask_for "Amazon AWS account number, e.g. 1234-2345-3456";
+
+my $name = ask_for "System administrator's name", REQUIRED;
+my $email = ask_for "System administrator's email address", REQUIRED;
+my $phone = ask_for "System administrator's phone number";
+my $username = ask_for "System administrator's username", REQUIRED;
+my $password = ask_for "System administrator's password", REQUIRED;
+
+# Connect to the customer and account data
+
+Data::Customer->connect();
+Data::Account->connect();
+
+# Make a new customer
+
+my $customer = Data::Customer->new(
+    contact         => $cust_contact,
+    company         => $cust_name,
+    street1         => $cust_street1,
+    street2         => $cust_street2,
+    city            => $cust_city,
+    country         => $cust_country,
+    zip_code        => $cust_zip_code,
+    tel_number      => $cust_tel_number,
+    fax_number      => $cust_fax_number,
+    tax_number      => $cust_tax_number,
+    url             => $cust_url,
+    email           => $cust_email,
+    brand           => $cust_brand,
+    aws_access_key  => $cust_aws_access_key,
+    aws_secret_key  => $cust_aws_secret_key,
+    aws_account_num => $cust_aws_account_num,
+);
+$customer->insert();
+
+my $account = Data::Account->new(
+    customer_id     => $customer->{id},
+    parent_id       => 0,
+    status          => 'A',
+    start_date      => Utils::Time->get_date(),
+    name            => $name,
+    email           => $email,
+    phone           => $phone,
+    username        => $username,
+    password        => $password,
+);
+$account->insert();
+
+print "Thank you. Setup complete.\n";
+
+# Disconnect from the database
+
+Data::Customer->disconnect();
+Data::Account->disconnect();
+
+__END__
+
+=head1 DEPENDENCIES
+
+Term::ReadLine, Data::Customer, Data::Account, Utils::Time
+
+=head1 AUTHOR
+
+Kevin Hutchinson <kevin.hutchinson@legendum.com>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2008 Legendum LLC
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 3
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.

@@ -35,7 +35,7 @@ my $known_hosts_file = "$ENV{HOME}/.ssh/known_hosts";
 if (-f $known_hosts_file)
 {
     open (KNOWN_HOSTS, $known_hosts_file);
-    exit 0 if grep /^$host,/, <KNOWN_HOSTS>;
+    exit if grep /^$host/, <KNOWN_HOSTS>;
     close KNOWN_HOSTS;
 }
 

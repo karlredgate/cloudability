@@ -7,7 +7,7 @@ my %object = (
     aws_snapshot_id => 'aws_snapshot_id',
     aws_volume_id   => 'aws_volume_id',
     aws_status      => 'aws_status',
-    aws_start_time  => '2008-11-25 12:34:56',
+    aws_started_at  => '2008-11-25 12:34:56',
     aws_progress    => '100%',
 );
 

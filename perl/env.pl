@@ -3,6 +3,7 @@
 use warnings;
 use Sys::Hostname;
 
+$ENV{HOME}            = '/Users/hutchike'; # For web API calls via Apache server
 $ENV{AWS_OWNER_ID}    = '992046831893'; # TODO: Change this to your AWS owner ID
 $ENV{AWS_KEY_FILE}    = '~/.ssh/c10y-keypair.pem'; # TODO: Change to your key
 $ENV{DB_USER}         = 'root';

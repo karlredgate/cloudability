@@ -2,102 +2,67 @@
 
 =head1 NAME
 
-Data::Customer - Manages service customers
+Data::CloudJob - Manages jobs to be run by the Server::CloudEngine
 
 =head1 VERSION
 
-This document refers to version 1.0 of Data::Customer, released Nov 07, 2008
+This document refers to version 1.0 of Data::CloudJob, released Nov 29, 2008
 
 =head1 DESCRIPTION
 
-Data::Customer manages the details for all service customers.
-Be sure to call the class static method connect() before using Data::Customer
+Data::CloudJob manages the details for jobs to be run by Server::CloudEngine.
+Be sure to call the class static method connect() before using Data::CloudJob
 objects and disconnect() once you've finished.
 
 =head2 Properties
 
 =over 4
 
-=item contact
+=item priority
 
-The customer's main contact name
+The job priority
 
-=item company
+=item command
 
-The customer's company name
+The command to run
 
-=item street1
+=item result
 
-The customer's street address, line 1
+The command result
 
-=item street2
+=item submit_time
 
-The customer's street address, line 2
+The time the job was submitted
 
-=item city
+=item start_time
 
-The customer's city
+The time the job was started
 
-=item country
+=item finish_time
 
-The customer's country
+The time the job was finished
 
-=item zip_code
+=item source_server
 
-The customer's zip code
+The server that created the job
 
-=item tel_number
+=item target_server
 
-The customer's contact telephone number
+The server that should run the job
 
-=item fax_number
+=item status
 
-The customer's contact facsimile number
-
-=item tax_number
-
-The customer's sales tax number (e.g. VAT number in Europe)
-
-=item url
-
-The customer's service URL
-
-=item email
-
-The customer's customer service email address
-
-=item brand
-
-The customer's service brand name
-
-=item aws_access_key
-
-The customer's AWS access key
-
-=item aws_secret_key
-
-The customer's AWS secret key
-
-=item aws_account_num
-
-The customer's AWS account number (typically "nnnn-nnnn-nnnn")
-
-=item aws_cert_name
-
-The customer's X.509 certificate file name (for bundling new images)
-
-=item aws_cert_text
-
-The customer's X.509 certificate file text (for bundling new images)
+The status of the job
 
 =back
 
 =cut
-package Data::Customer;
+package Data::CloudJob;
 $VERSION = "1.0";
 
 use strict;
 use base 'Data::Object';
+use Constants::AWS;
 {
     # Class static properties
 
@@ -124,7 +89,7 @@ sub connect
         $args{host} = $ENV{BACKUP_SERVER};
         $_Connection = $class->SUPER::connect(%args);
     }
-    $class->fields(qw(contact company street1 street2 city country zip_code tel_number fax_number tax_number url email brand aws_access_key aws_secret_key aws_account_num aws_cert_name aws_cert_text));
+    $class->fields(qw(id priority command result submit_time start_time finish_time source_server target_server status));
 
     return $_Connection;
 }
@@ -143,6 +108,32 @@ sub disconnect
     $class->SUPER::disconnect();
 }
 
+=item submit(command => $command, priority => $priority)
+
+Submit a new cloud job
+
+=cut
+sub submit
+{
+    my ($class, %args) = @_;
+
+    # Default the job details
+
+    $args{command} or die "no job command provided";
+    $args{priority} ||= Constants::AWS::DEFAULT_JOB_PRIORITY;
+    $args{submit_time} ||= time();
+    $args{status} ||= Constants::AWS::STATUS_ACTIVE;
+
+    # Submit the new cloud job
+
+    Data::CloudJob->connect();
+    my $cloud_job = Data::CloudJob->new(%args);
+    $cloud_job->insert();
+    Data::CloudJob->disconnect();
+
+    return $cloud_job;
+}
+
 =back
 
 =head2 Object Methods
@@ -159,7 +150,7 @@ sub disconnect
 
 =head1 DEPENDENCIES
 
-Data::Object
+Data::Object, Constants::General
 
 =head1 AUTHOR
 
