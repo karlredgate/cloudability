@@ -26,6 +26,9 @@ $VERSION = "1.0";
 
 use strict;
 
+# Translate Amazon AWS fields to local names
+# Note that "PARSE" causes recursive parsing
+
 use constant FIELDS => {
     architecture    => 'aws_architecture',
     attachTime      => 'aws_attached_at',
@@ -63,9 +66,14 @@ use constant FIELDS => {
     volumeId        => 'aws_volume_id',
 };
 
+# The cloud engine runs jobs at a default priority
+
+use constant DEFAULT_JOB_PRIORITY   => 100;
+
 # Instance, account and account token status values
 
 use constant STATUS_ACTIVE          => 'A';
+use constant STATUS_ERROR           => 'E';
 use constant STATUS_PENDING         => 'P';
 use constant STATUS_RUNNING         => 'R';
 use constant STATUS_SUSPENDED       => 'S';

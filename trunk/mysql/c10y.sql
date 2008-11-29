@@ -3,6 +3,20 @@
 # This file creates a Cloudability (c10y) database to measure
 # resource allocation for customers in the Amazon (AWS) cloud.
 
+create table if not exists cloud_jobs
+(
+    id              INTEGER UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    priority        TINYINT UNSIGNED NOT NULL DEFAULT 100,
+    command         VARCHAR(255) NOT NULL,
+    result          TEXT,
+    submit_time     INTEGER UNSIGNED DEFAULT 0,
+    start_time      INTEGER UNSIGNED DEFAULT 0,
+    finish_time     INTEGER UNSIGNED DEFAULT 0,
+    source_server   VARCHAR(255),
+    target_server   VARCHAR(255),
+    status          CHAR(1) NOT NULL DEFAULT 'A'
+) MAX_ROWS = 4294967296;
+
 create table if not exists customers
 (
     id              INTEGER UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -19,6 +33,11 @@ create table if not exists customers
     url             VARCHAR(40) NOT NULL,
     email           VARCHAR(40) NOT NULL,
     brand           VARCHAR(40) NOT NULL,
+    aws_access_key  VARCHAR(255),
+    aws_secret_key  VARCHAR(255),
+    aws_account_num VARCHAR(255),
+    aws_cert_name   VARCHAR(255),
+    aws_cert_text   MEDIUMTEXT,
 
     KEY             company (company)
 ) MAX_ROWS = 4294967296;

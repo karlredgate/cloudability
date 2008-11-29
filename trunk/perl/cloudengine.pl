@@ -8,27 +8,15 @@ BEGIN {
 }
 
 use lib "$ENV{CLOUDABILITY_HOME}/perl/lib";
-use Clients::AWS;
-
-my $aws = Clients::AWS->new();
-my $account_id = shift || 0; die "bad account ID" unless $account_id =~ /\d+/;
-my $cmd = join ' ', @ARGV;
-if ($cmd)
-{
-    # Command so run it
-    $aws->command($cmd, $account_id);
-}
-else
-{
-    # No command so sync
-    $aws->syncronize();
-}
+use Servers::CloudEngine;
+my $cloud_engine = Servers::CloudEngine->new();
+$cloud_engine->run();
 
 __END__
 
 =head1 DEPENDENCIES
 
-Clients::AWS
+Servers::CloudEngine
 
 =head1 AUTHOR
 

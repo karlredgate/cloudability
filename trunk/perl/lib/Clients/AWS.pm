@@ -42,7 +42,7 @@ use Utils::LogFile;
 
 =over 4
 
-=item new($aws_owner_id)
+=item new([$aws_owner_id])
 
 Create a new Clients::AWS object for an Amazon AWS owner ID (e.g. 992046831893)
 
@@ -85,15 +85,16 @@ sub command
     $self->{log_file}->info("Command $cmd");
     $self->{account_id} = $account_id || 0;
 
+    my $objects = [];
     if ($cmd =~ /^(run|run-instances?|tin|terminate-instances?)/)
     {
-        my $instances = $self->parse_aws_command($cmd, 'instanceId');
-        $self->sync_instances($instances);
+        $objects = $self->parse_aws_command($cmd, 'instanceId');
+        $self->sync_instances($objects);
     }
     elsif ($cmd =~ /^(csnap|create-snapshot)/)
     {
-        my $snapshots = $self->parse_aws_command($cmd, 'snapshotId');
-        $self->sync_snapshots($snapshots);
+        $objects = $self->parse_aws_command($cmd, 'snapshotId');
+        $self->sync_snapshots($objects);
     }
     elsif ($cmd =~ /^(delsnap|delete-snapshot)\s+(\S+)/)
     {
@@ -103,8 +104,8 @@ sub command
     }
     elsif ($cmd =~ /^(attvol|attach-volume|cvol|create-volume|detvol|detach-volume)/)
     {
-        my $volumes = $self->parse_aws_command($cmd, 'volumeId');
-        $self->sync_volumes($volumes);
+        $objects = $self->parse_aws_command($cmd, 'volumeId');
+        $self->sync_volumes($objects);
     }
     elsif ($cmd =~ /^(delvol|delete-volume)\s+(\S+)/)
     {
@@ -112,6 +113,10 @@ sub command
         my $volume = Data::Volume->find_by_aws_volume_id($2);
         $volume->delete() if $volume->{id};
     }
+
+    # Return the object list from a sync command
+
+    return $objects;
 }
 
 =item syncronize()
@@ -122,7 +127,7 @@ Syncronize the Cloudability database with Amazon AWS information
 sub syncronize
 {
     my ($self) = @_;
-    $self->{log_file}->info("Syncronizing images, instances and volumes");
+    $self->{log_file}->info("Syncronizing images, instances, snapshots and volumes");
 
     my $images = $self->parse_aws_command('dim -o ' . $self->{aws_owner_id});
     $self->sync_images($images);
