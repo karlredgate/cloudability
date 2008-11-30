@@ -48,7 +48,7 @@ pod2usage(1) if $help || (!$restart && !$start && !$status && !$stop);
 
 # Set the path to the command programs
 
-my $path = "$ENV{PERFORM_HOME}/perl";
+my $path = "$ENV{CLOUDABILITY_HOME}/perl";
 
 # Get a list of all running perl processes
 
