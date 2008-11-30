@@ -42,6 +42,22 @@ The time when the snapshot was taken
 
 How much of the snapshot has been completed so far, for example "100%"
 
+=item name
+
+A user-assigned name for the snapshot, for example "Acme data"
+
+=item description
+
+A user-assigned description for the snapshot, for example "Acme's accounts "
+
+=item deleted_at
+
+The date and time the snapshot was deleted
+
+=item status
+
+The status of the snapshot, for example [A]ctive or [D]eleted
+
 =back
 
 =cut
@@ -50,6 +66,8 @@ $VERSION = "1.0";
 
 use strict;
 use base 'Data::Object';
+use Constants::AWS;
+use Utils::Time;
 {
     # Class static properties
 
@@ -76,7 +94,7 @@ sub connect
         $args{host} = $ENV{BACKUP_SERVER};
         $_Connection = $class->SUPER::connect(%args);
     }
-    $class->fields(qw(account_id aws_snapshot_id aws_volume_id aws_status aws_started_at aws_progress));
+    $class->fields(qw(account_id aws_snapshot_id aws_volume_id aws_status aws_started_at aws_progress name description deleted_at status));
 
     return $_Connection;
 }
@@ -118,6 +136,18 @@ sub find_by_aws_snapshot_id
     return $snapshot;
 }
 
+=item soft_delete()
+
+Update the snapshot to have a "deleted_at" time and a status of [D]eleted
+
+=cut
+sub soft_delete
+{
+    my ($self) = @_;
+    $self->{deleted_at} = Utils::Time->get_date_time();
+    $self->{status} = Constants::AWS::STATUS_DELETED;
+    $self->update();
+}
 
 }1;
 
@@ -125,7 +155,7 @@ sub find_by_aws_snapshot_id
 
 =head1 DEPENDENCIES
 
-Data::Object
+Data::Object, Constants::AWS, Utils::Time
 
 =head1 AUTHOR
 

@@ -54,6 +54,7 @@ create table if not exists images
     aws_type        VARCHAR(255) NOT NULL,
     aws_kernel_id   VARCHAR(255) NOT NULL,
     aws_ramdisk_id  VARCHAR(255) NOT NULL,
+    name            VARCHAR(255),
     description     MEDIUMTEXT,
 
     KEY             aws_image_id (aws_image_id)
@@ -106,6 +107,10 @@ create table if not exists volumes
     aws_is_attached ENUM('Y', 'N') NOT NULL,
     aws_attached_at DATETIME,
     aws_created_at  DATETIME,
+    name            VARCHAR(255),
+    description     MEDIUMTEXT,
+    deleted_at      DATETIME,
+    status          CHAR(1) NOT NULL DEFAULT 'A',
 
     KEY             account_id (account_id),
     KEY             aws_volume_id (aws_volume_id),
@@ -121,6 +126,10 @@ create table if not exists snapshots
     aws_status      VARCHAR(255) NOT NULL,
     aws_started_at  DATETIME,
     aws_progress    VARCHAR(255),
+    name            VARCHAR(255),
+    description     MEDIUMTEXT,
+    deleted_at      DATETIME,
+    status          CHAR(1) NOT NULL DEFAULT 'A',
 
     KEY             account_id (account_id),
     KEY             aws_volume_id (aws_volume_id),

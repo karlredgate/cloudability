@@ -79,14 +79,14 @@ sub command
     my $account = $args{account} or die "no account";
 
     my $objects;
-    if ($command =~ /^(dim|din|dsnap|dvol)/)
+    if ($command =~ /^(dim|describe-images|din|describe-instances|dsnap|describe-snapshots|dvol|describe-volumes)/)
     {
         # Get resource data from the sync database
 
-        $objects = $self->describe_images($account) if $command =~ /^(dim)/;
-        $objects = $self->describe_instances($account) if $command =~ /^(din)/;
-        $objects = $self->describe_snapshots($account) if $command =~ /^(dsnap)/;
-        $objects = $self->describe_volumes($account) if $command =~ /^(dvol)/;
+        $objects = $self->describe_images($account) if $command =~ /^(dim|describe-images)/;
+        $objects = $self->describe_instances($account) if $command =~ /^(din|describe-instances)/;
+        $objects = $self->describe_snapshots($account) if $command =~ /^(dsnap|describe-snapshots)/;
+        $objects = $self->describe_volumes($account) if $command =~ /^(dvol|describe-volumes)/;
     }
     else
     {
@@ -111,20 +111,22 @@ sub format
     my ($self, %args) = @_;
     my $format = $args{format} || 'xml';
     my $request = $args{request} || '';
+    my $command = $args{command};
     my $objects = $args{objects};
     my $object_type = $self->{object_type} || 'object';
 
-    my $result = {
+    my $aws = {
         "${object_type}s" => { $object_type => $objects },
         stats => { request     => $request,
+                   command     => $command,
                    remote_addr => $ENV{HTTP_REMOTE_ADDR},
                    timestamp   => time() }
     };
 
     if ($format eq 'xml')
     {
-        my $xml = new XML::Simple(RootName => 'result');
-        return $xml->XMLout($result);
+        my $xml = new XML::Simple(RootName => 'aws');
+        return $xml->XMLout($aws);
     }
     elsif ($format eq 'csv')
     {
@@ -137,7 +139,7 @@ sub format
     elsif ($format eq 'json')
     {
         my $json = new JSON;
-        return $json->objToJson($result);
+        return $json->objToJson($aws);
     }
 }
 

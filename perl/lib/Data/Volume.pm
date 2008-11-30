@@ -54,6 +54,22 @@ When attached, the date and time the AWS volume was attached to the instance
 
 The AWS date and time the volume was created
 
+=item name
+
+A user-assigned name for the volume, for example "Acme data"
+
+=item description
+
+A user-assigned description for the volume, for example "Acme's accounts "
+
+=item deleted_at
+
+The date and time the volume was deleted
+
+=item status
+
+The status of the volume, for example [A]ctive or [D]eleted
+
 =back
 
 =cut
@@ -62,6 +78,8 @@ $VERSION = "1.0";
 
 use strict;
 use base 'Data::Object';
+use Constants::AWS;
+use Utils::Time;
 {
     # Class static properties
 
@@ -88,7 +106,7 @@ sub connect
         $args{host} = $ENV{BACKUP_SERVER};
         $_Connection = $class->SUPER::connect(%args);
     }
-    $class->fields(qw(account_id aws_volume_id aws_size aws_avail_zone aws_status aws_device aws_instance_id aws_attached_at aws_created_at));
+    $class->fields(qw(account_id aws_volume_id aws_size aws_avail_zone aws_status aws_device aws_instance_id aws_attached_at aws_created_at name description deleted_at status));
 
     return $_Connection;
 }
@@ -130,13 +148,26 @@ sub find_by_aws_volume_id
     return $volume;
 }
 
+=item soft_delete()
+
+Update the volume to have a "deleted_at" time and a status of [D]eleted
+
+=cut
+sub soft_delete
+{
+    my ($self) = @_;
+    $self->{deleted_at} = Utils::Time->get_date_time();
+    $self->{status} = Constants::AWS::STATUS_DELETED;
+    $self->update();
+}
+
 }1;
 
 =back
 
 =head1 DEPENDENCIES
 
-Data::Object
+Data::Object, Constants::AWS, Utils::Time
 
 =head1 AUTHOR
 

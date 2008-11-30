@@ -109,7 +109,7 @@ sub select
 
     die "no matching account configs" unless @account_configs;
 
-    return { status => 'ok', account_configs => { account_config =>  \@account_configs } };
+    return { status => 'ok', account_configs => { account_config => \@account_configs } };
 }
 
 =item update($values)

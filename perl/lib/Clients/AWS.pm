@@ -60,7 +60,6 @@ sub new
         account_id      => 0, # see the command() method below
         log_file        => Utils::LogFile->new("$ENV{LOGS_DIR}/aws"),
     };
-    $self->{log_file}->alert("Starting for owner $aws_owner_id");
 
     # Return the new Clients::AWS object
 
@@ -100,7 +99,7 @@ sub command
     {
         system "$_AWS_CMD $cmd > /dev/null";
         my $snapshot = Data::Snapshot->find_by_aws_snapshot_id($2);
-        $snapshot->delete() if $snapshot->{id};
+        $snapshot->soft_delete() if $snapshot->{id};
     }
     elsif ($cmd =~ /^(attvol|attach-volume|cvol|create-volume|detvol|detach-volume)/)
     {
@@ -111,7 +110,7 @@ sub command
     {
         system "$_AWS_CMD $cmd > /dev/null";
         my $volume = Data::Volume->find_by_aws_volume_id($2);
-        $volume->delete() if $volume->{id};
+        $volume->soft_delete() if $volume->{id};
     }
 
     # Return the object list from a sync command
@@ -314,6 +313,7 @@ sub sync_snapshots
         {
             my $volume = Data::Volume->find_by_aws_volume_id($snapshot->{aws_volume_id});
             $snapshot->{account_id} = $self->{account_id} || $volume->{account_id} || 0;
+            $snapshot->{status} = Constants::AWS::STATUS_ACTIVE;
             Data::Snapshot->new(%{$snapshot})->insert();
         }
     }
@@ -342,6 +342,7 @@ sub sync_volumes
         {
             my $instance = Data::Instance->find_by_aws_instance_id($volume->{aws_instance_id});
             $volume->{account_id} = $self->{account_id} || $instance->{account_id} || 0;
+            $volume->{status} = Constants::AWS::STATUS_ACTIVE;
             Data::Volume->new(%{$volume})->insert();
         }
     }
