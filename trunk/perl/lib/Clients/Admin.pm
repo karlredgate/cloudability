@@ -210,11 +210,11 @@ Data::Customer, Data::Account, XML::Simple, JSON
 
 =head1 AUTHOR
 
-Kevin Hutchinson <kevin.hutchinson@guanoo.com>
+Kevin Hutchinson <kevin.hutchinson@legendum.com>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2008 Guanoo, Inc.
+Copyright (c) 2008 Legendum LLC
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License

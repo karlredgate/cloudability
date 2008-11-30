@@ -274,8 +274,20 @@ sub sync_instances
         my $found = Data::Instance->select('aws_instance_id = ?', $instance->{aws_instance_id});
         if ($found->{id})
         {
+            # Initialize a host if it has just started running
+
+            my $needs_to_init = 0;
+            if ($instance->{status} eq Constants::AWS::STATUS_RUNNING
+                && $found->{status} ne Constants::AWS::STATUS_RUNNING)
+            {
+                $needs_to_init = 1;
+            }
+
+            # Copy the instance state over to the found instance
+
             $self->copy_object($instance, $found);
             $found->update();
+            $found->init_host() if $needs_to_init;
         }
         else
         {
