@@ -156,6 +156,28 @@ sub find_by_aws_instance_id
     return $instance;
 }
 
+=item init_host()
+
+Initialize a host that has just started running
+
+=cut
+sub init_host
+{
+    my ($self) = @_;
+    return if $self->{status} ne Constants::AWS::STATUS_RUNNING;
+    die "no AWS public DNS host name" unless $self->{aws_public_dns};
+
+    $self->know_host(); # so we don't get prompted for SSH/SCP configmations
+    open (INIT, "$ENV{CLOUDABILITY_HOME}/config/init.sh") or die "no init file";
+    while (my $command = <INIT>)
+    {
+        $command =~ s/KEY/$ENV{AWS_KEY_FILE}/g;
+        $command =~ s/HOST/$self->{aws_public_dns}/g;
+        system $command;
+    }
+    close INIT;
+}
+
 =item know_host()
 
 Make sure we know the instance's host for SSH commands
