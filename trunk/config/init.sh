@@ -5,4 +5,4 @@
 # For example:
 #
 # scp -i KEY ~/perl/env.pl root@HOST:cloudability/perl/
-# ssh -i KEY root@HOST bin/cloudserver -restart
+# ssh -i KEY root@HOST cloudability/bin/cloudserver -restart
