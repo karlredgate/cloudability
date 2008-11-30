@@ -54,6 +54,10 @@ The AWS kernel ID for the image, for example "aki-a71cf9ce"
 
 The AWS ramdisk ID for the image, for example "ari-a51cf9cc"
 
+=item name
+
+A useful human name for the image, for example its operating system "Ubuntu 8.1"
+
 =item description
 
 A useful human description of the AWS image, for example its installed services
@@ -92,7 +96,7 @@ sub connect
         $args{host} = $ENV{BACKUP_SERVER};
         $_Connection = $class->SUPER::connect(%args);
     }
-    $class->fields(qw(aws_image_id aws_location aws_state aws_owner_id aws_is_public aws_architecture aws_type aws_kernel_id aws_ramdisk_id description));
+    $class->fields(qw(aws_image_id aws_location aws_state aws_owner_id aws_is_public aws_architecture aws_type aws_kernel_id aws_ramdisk_id name description));
 
     return $_Connection;
 }

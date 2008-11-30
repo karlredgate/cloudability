@@ -73,7 +73,9 @@ use constant DEFAULT_JOB_PRIORITY   => 100;
 # Instance, account and account token status values
 
 use constant STATUS_ACTIVE          => 'A';
+use constant STATUS_DELETED         => 'D';
 use constant STATUS_ERROR           => 'E';
+use constant STATUS_HALTING         => 'H';
 use constant STATUS_PENDING         => 'P';
 use constant STATUS_RUNNING         => 'R';
 use constant STATUS_SUSPENDED       => 'S';
@@ -83,6 +85,7 @@ use constant STATUS_UNKNOWN         => 'U';
 use constant STATES => {
     pending         => Constants::AWS::STATUS_PENDING,
     running         => Constants::AWS::STATUS_RUNNING,
+    'shutting-down' => Constants::AWS::STATUS_HALTING,
     terminated      => Constants::AWS::STATUS_TERMINATED,
 };
 

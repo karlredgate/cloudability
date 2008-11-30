@@ -167,7 +167,7 @@ sub know_host
     return if $self->{status} ne Constants::AWS::STATUS_RUNNING;
     die "no AWS public DNS host name" unless $self->{aws_public_dns};
 
-    system "$_KNOW_HOST_CMD $ENV{AWS_KEY_FILE} $self->{aws_public_dns}";
+    system "$_KNOW_HOST_CMD $ENV{AWS_KEY_FILE} $self->{aws_public_dns} >/dev/null";
 }
 
 }1;
