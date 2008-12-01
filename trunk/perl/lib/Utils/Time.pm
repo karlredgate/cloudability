@@ -90,7 +90,7 @@ sub get_time_range
 
 =item get_date($time, $time_zone)
 
-Get the date (YYYYMMDD) for an epoch time and time zone
+Get the date (YYYY-MM-DD) for an epoch time and time zone
 
 =cut
 sub get_date
@@ -103,12 +103,12 @@ sub get_date
 
     $time += HOUR_SECS * $time_zone;
     my ($mday, $month, $year) = (gmtime($time))[MDAY, MONTH, YEAR];
-    return sprintf("%04d%02d%02d", $year + 1900, $month + 1, $mday);
+    return sprintf("%04d-%02d-%02d", $year + 1900, $month + 1, $mday);
 }
 
 =item get_date_time($time, $time_zone)
 
-Get the date and time (YYYYMMDD HH:MM:SS) for an epoch time and time zone
+Get the date and time (YYYY-MM-DD HH:MM:SS) for an epoch time and time zone
 
 =cut
 sub get_date_time
@@ -121,7 +121,7 @@ sub get_date_time
 
     $time += HOUR_SECS * $time_zone;
     my ($mday, $month, $year, $hour, $mins, $secs) = (gmtime($time))[MDAY, MONTH, YEAR, HOUR, MINS, SECS];
-    return sprintf("%04d%02d%02d %02d:%02d:%02d", $year + 1900, $month + 1, $mday, $hour, $mins, $secs);
+    return sprintf("%04d-%02d-%02d %02d:%02d:%02d", $year + 1900, $month + 1, $mday, $hour, $mins, $secs);
 }
 
 =item get_date_range($period, $days_ago, $time_zone, [$time])

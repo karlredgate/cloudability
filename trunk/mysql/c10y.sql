@@ -42,6 +42,21 @@ create table if not exists customers
     KEY             company (company)
 ) MAX_ROWS = 4294967296;
 
+create table if not exists addresses
+(
+    id              INTEGER UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    account_id      INTEGER UNSIGNED NOT NULL,
+    aws_public_ip   VARCHAR(255) NOT NULL,
+    name            VARCHAR(255),
+    description     MEDIUMTEXT,
+    created_at      DATETIME,
+    deleted_at      DATETIME,
+    status          CHAR(1) NOT NULL DEFAULT 'A',
+
+    KEY             account_id (account_id),
+    KEY             aws_public_ip (aws_public_ip)
+) MAX_ROWS = 4294967296;
+
 create table if not exists images
 (
     id              INTEGER UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -77,6 +92,9 @@ create table if not exists instances
     aws_started_at  DATETIME NOT NULL,
     aws_finished_at DATETIME,
     aws_term_reason VARCHAR(255),
+    name            VARCHAR(255),
+    description     MEDIUMTEXT,
+    init_file       VARCHAR(255),
     status          CHAR(1) NOT NULL DEFAULT 'R',
 
     KEY             account_id (account_id),

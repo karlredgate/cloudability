@@ -12,5 +12,6 @@ $ENV{HOSTNAME}        = hostname();
 $ENV{LOGGING_LEVEL}   ||= 2; # info and above
 $ENV{LOGS_DIR}        = "$ENV{CLOUDABILITY_HOME}/logs";
 $ENV{DATA_DIR}        = "$ENV{CLOUDABILITY_HOME}/data";
+$ENV{INIT_DIR}        = "$ENV{CLOUDABILITY_HOME}/init";
 $ENV{MASTER_SERVER}   ||= 'localhost';
 $ENV{BACKUP_SERVER}   ||= 'localhost';

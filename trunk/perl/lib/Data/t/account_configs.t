@@ -12,7 +12,7 @@ use Test::More tests => 3;
 use Data::AccountConfig;
 Data::AccountConfig->connect();
 
-# Store and retrieve a object to check all fields
+# Store and retrieve an object to check all fields
 
 my $inserted = Data::AccountConfig->new( %object );
 $inserted->insert();

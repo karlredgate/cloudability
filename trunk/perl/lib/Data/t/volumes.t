@@ -12,13 +12,17 @@ my %object = (
     aws_instance_id => 'aws_instance_id',
     aws_attached_at => '2008-11-25 12:34:56',
     aws_created_at  => '2008-11-24 00:00:00',
+    name            => 'name',
+    description     => 'description',
+    deleted_at      => '2008-11-30 12:34:56',
+    status          => 'D',
 );
 
-use Test::More tests => 9;
+use Test::More tests => 13;
 use Data::Volume;
 Data::Volume->connect();
 
-# Store and retrieve a object to check all fields
+# Store and retrieve an object to check all fields
 
 my $inserted = Data::Volume->new( %object );
 $inserted->insert();

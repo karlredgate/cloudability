@@ -2,16 +2,16 @@
 
 =head1 NAME
 
-Data::Snapshot - Manages snapshots of volumes, to hold customer data securely
+Data::Address - Manages customer IP addresses, to provide DNS into Amazon AWS
 
 =head1 VERSION
 
-This document refers to version 1.0 of Data::Snapshot, released Nov 28, 2008
+This document refers to version 1.0 of Data::Address, released Nov 30, 2008
 
 =head1 DESCRIPTION
 
-Data::Snapshot manages snapshots of volumes, to hold customer data securely.
-Be sure to call the class static method connect() before using Data::Volume
+Data::Address manages customer IP addresses, to provide DNS into Amazon AWS.
+Be sure to call the class static method connect() before using Data::Address
 objects and disconnect() once you've finished.
 
 =head2 Properties
@@ -20,48 +20,36 @@ objects and disconnect() once you've finished.
 
 =item account_id
 
-The volume owner's account ID
+The IP address owner's account ID
 
-=item aws_snapshot_id
+=item aws_public_ip
 
-The AWS snapshot ID, for example "snap-68719101"
-
-=item aws_volume_id
-
-The AWS volume ID, for example "vol-164ca97f"
-
-=item aws_status
-
-The AWS snapshot status, for example "completed"
-
-=item aws_started_at
-
-The time when the snapshot was taken
-
-=item aws_progress
-
-How much of the snapshot has been completed so far, for example "100%"
+The public IP address
 
 =item name
 
-A user-assigned name for the snapshot, for example "Acme data v1"
+A user-assigned name for the IP address, for example "Acme main public IP"
 
 =item description
 
-A user-assigned description for the snapshot, for example "Acme's accounts v1"
+A user-assigned description for the IP address, for example "Site www.acme.com"
+
+=item created_at
+
+The date and time the IP address was created
 
 =item deleted_at
 
-The date and time the snapshot was deleted
+The date and time the IP address was deleted
 
 =item status
 
-The status of the snapshot, for example [A]ctive or [D]eleted
+The status of the IP address, for example [A]ctive or [D]eleted
 
 =back
 
 =cut
-package Data::Snapshot;
+package Data::Address;
 $VERSION = "1.0";
 
 use strict;
@@ -94,7 +82,7 @@ sub connect
         $args{host} = $ENV{BACKUP_SERVER};
         $_Connection = $class->SUPER::connect(%args);
     }
-    $class->fields(qw(account_id aws_snapshot_id aws_volume_id aws_status aws_started_at aws_progress name description deleted_at status));
+    $class->fields(qw(account_id aws_public_ip name description created_at deleted_at status));
 
     return $_Connection;
 }
@@ -119,26 +107,26 @@ sub disconnect
 
 =over 4
 
-=item find_by_aws_snapshot_id($aws_snapshot_id)
+=item find_by_public_ip($public_ip)
 
-Find a snapshot in the database by its AWS snapshot ID
+Find an IP address in the database by its public IP (e.g. '75.101.151.221')
 
 =cut
-sub find_by_aws_snapshot_id
+sub find_by_public_ip
 {
-    my ($self, $aws_snapshot_id) = @_;
+    my ($self, $aws_public_ip) = @_;
     my $class = ref $self || $self;
 
     $class->connect();
-    my $snapshot = $class->select('aws_snapshot_id = ?', $aws_snapshot_id);
+    my $address = $class->select('aws_public_ip = ?', $aws_public_ip);
     #$class->disconnect();
 
-    return $snapshot;
+    return $address;
 }
 
 =item soft_delete()
 
-Update the snapshot to have a "deleted_at" time and a status of [D]eleted
+Update the IP address to have a "deleted_at" time and a status of [D]eleted
 
 =cut
 sub soft_delete

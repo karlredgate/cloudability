@@ -60,7 +60,7 @@ A user-assigned name for the volume, for example "Acme data"
 
 =item description
 
-A user-assigned description for the volume, for example "Acme's accounts "
+A user-assigned description for the volume, for example "Acme's accounts"
 
 =item deleted_at
 

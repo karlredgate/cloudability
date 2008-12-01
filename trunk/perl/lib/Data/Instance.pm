@@ -74,6 +74,18 @@ The AWS time the instance finished running
 
 The AWS image termination reason
 
+=item name
+
+A user-assigned name for the instance, for example "Acme web server"
+
+=item description
+
+A user-assigned description for the instance, for example "Site www.acme.com"
+
+=item init_file
+
+The init file that was used to configure the instance on start-up
+
 =item status
 
 The status of the image [P]ending, [R]unning, [S]hutting down or [T]erminated
@@ -114,7 +126,7 @@ sub connect
         $args{host} = $ENV{BACKUP_SERVER};
         $_Connection = $class->SUPER::connect(%args);
     }
-    $class->fields(qw(account_id aws_instance_id aws_image_id aws_kernel_id aws_ramdisk_id aws_inst_state aws_inst_type aws_avail_zone aws_key_name aws_public_dns aws_private_dns aws_started_at aws_finished_at aws_term_reason status));
+    $class->fields(qw(account_id aws_instance_id aws_image_id aws_kernel_id aws_ramdisk_id aws_inst_state aws_inst_type aws_avail_zone aws_key_name aws_public_dns aws_private_dns aws_started_at aws_finished_at aws_term_reason name description init_file status));
 
     return $_Connection;
 }
@@ -168,7 +180,8 @@ sub init_host
     die "no AWS public DNS host name" unless $self->{aws_public_dns};
 
     $self->know_host(); # so we don't get prompted for SSH/SCP configmations
-    open (INIT, "$ENV{CLOUDABILITY_HOME}/config/init.sh") or die "no init file";
+    my $init_file = $self->{init_file} || Constants::AWS::INIT_FILE;
+    open (INIT, "$ENV{INIT_DIR}/$init_file") or die "no init file";
     while (my $command = <INIT>)
     {
         $command =~ s/KEY/$ENV{AWS_KEY_FILE}/g;

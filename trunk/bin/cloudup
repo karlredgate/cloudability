@@ -39,14 +39,16 @@ GetOptions("revision:i" => \$revision,
            "help|?"     => \$help) or pod2usage(2);
 pod2usage(1) if $help;
 
-# Update the Cloudability code, preserving env.pl and notify.txt
+# Update the Cloudability code, preserving env.pl, init.sh and notify.txt
 
-system "mv $ENV{CLOUDABILITY_HOME}/perl/env.pl /tmp/env.pl";
-system "mv $ENV{CLOUDABILITY_HOME}/monitor/notify.txt /tmp/notify.txt";
+system "mv $ENV{CLOUDABILITY_HOME}/perl/env.pl /tmp/c10y-env.pl";
+system "mv $ENV{CLOUDABILITY_HOME}/config/init.sh /tmp/c10y-init.sh";
+system "mv $ENV{CLOUDABILITY_HOME}/monitor/notify.txt /tmp/c10y-notify.txt";
 $revision = $revision ? "-r $revision" : '';
 system "/usr/bin/svn update $revision $ENV{CLOUDABILITY_HOME}";
-system "mv /tmp/env.pl $ENV{CLOUDABILITY_HOME}/perl/env.pl";
-system "mv /tmp/notify.txt $ENV{CLOUDABILITY_HOME}/monitor/notify.txt";
+system "mv /tmp/c10y-env.pl $ENV{CLOUDABILITY_HOME}/perl/env.pl";
+system "mv /tmp/c10y-init.sh $ENV{CLOUDABILITY_HOME}/config/init.sh";
+system "mv /tmp/c10y-notify.txt $ENV{CLOUDABILITY_HOME}/monitor/notify.txt";
 
 __END__
 

@@ -12,7 +12,7 @@ use Test::More tests => 3;
 use Data::InstanceConfig;
 Data::InstanceConfig->connect();
 
-# Store and retrieve a object to check all fields
+# Store and retrieve an object to check all fields
 
 my $inserted = Data::InstanceConfig->new( %object );
 $inserted->insert();
