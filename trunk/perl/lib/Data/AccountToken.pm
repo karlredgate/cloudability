@@ -118,7 +118,7 @@ Count the call to the account token, and return an error if we cannot call it
 sub call
 {
     my ($self) = @_;
-    my $date = Utils::Time->get_date();
+    my $date = Utils::Time->get_date(); $date =~ s/-//g;
     my $start_date = $self->{start_date} || ''; $start_date =~ s/-//g;
     my $end_date = $self->{end_date} || ''; $end_date =~ s/-//g;
 
