@@ -6,15 +6,21 @@
 # provided you retain my copyright notice and, when possible, a link to my website.
 #
 
-$program_version = "1.19";
+$program_version = "1.21";
+$aws_version = "2008-08-08";
 
 #
 # Need to implement:
 #
-#   ConfirmProductInstance
-#   DescribeImageAttribute
+#   ConfirmProductInstance - not tested
+#   DescribeImageAttribute - not working "An internal error has occurred"
 #   ModifyImageAttribute
 #   ResetImageAttribute
+#
+# Windows support:
+#   BundleInstance
+#   DescribeBundleTasks
+#   CancelBundleTasks
 #
 
 @cmd = (
@@ -45,6 +51,10 @@ $program_version = "1.19";
 								  ["o", SourceSecurityGroupName],
 								  ["s", CidrIp, "0.0.0.0/0"],
 								  ]],
+	["ec2", "confirm-product-instance", ConfirmProductInstance, [
+								     ["", ProductCode],
+								     ["-i", InstanceId],
+								     ]],
 	["ec2", "create-snapshot csnap", CreateSnapshot, [["", VolumeId]]],
 	["ec2", "create-volume cvol", CreateVolume, [
 						     ["size", Size],
@@ -59,6 +69,14 @@ $program_version = "1.19";
 	["ec2", "describe-addresses dad", DescribeAddresses, [["", PublicIpN]]],
 	["ec2", "describe-availability-zones daz", DescribeAvailabilityZones, [["", ZoneNameN]]],
 	["ec2", "describe-groups dgrp", DescribeSecurityGroups, [["", GroupNameN]]],
+	["ec2", "describe-image-attribute", DescribeImageAttribute, [
+								       ["", ImageId],
+								       ["-l", launchPermission],
+								       ["-p", productCodes],
+								       ["--kernel", "kernel"],
+								       ["--ramdisk", "ramdisk"],
+								       ["-B", "blockDeviceMapping"],
+								       ]],
 	["ec2", "describe-images dim", DescribeImages, [
 							["", ImageIdN],
 							["o", OwnerN],
@@ -73,7 +91,7 @@ $program_version = "1.19";
 	["ec2", "get-console-output gco", GetConsoleOutput, [["", InstanceId]]],
 	["ec2", "reboot-instances reboot", RebootInstances, [["", InstanceIdN]]],
 	["ec2", "release-address rad", ReleaseAddress, [["", PublicIp]]],
-	["ec2", "register", RegisterImage, [["", ImageLocation]]],
+	["ec2", "register-image register", RegisterImage, [["", ImageLocation]]],
 	["ec2", "revoke", RevokeSecurityGroupIngress, [
 						       ["", GroupName],
 						       ["P", IpProtocol],
@@ -169,17 +187,26 @@ for (split(/[\r\s]+/, load_file_silent("$home/.awsrc")), @ARGV)
 
 $h ||= $help;
 $v ||= $verbose;
-$verbose = "--verbose" if $v >= 2;
+$verbose = $v >= 2? "--verbose": "";
 
-print STDERR "aws version: v$program_version\n" if $v;
+print STDERR "aws version: v$program_version  (protocol version $aws_version)\n" if $v;
 
 $insecsign = "--insecure" if $insecure || $insecure_signing;
 $insecureaws = "--insecure" if $insecureaws || $insecure_aws;
 
+$scheme = $http? "http": "https";
+
 $fail = "--fail" if $fail;
 $silent ||= !-t;
 
-$secretsfile ||= "$home/.awssecret";
+$secrets_file ||= "$home/.awssecret";
+
+$limit_rate = "--limit-rate $limit_rate" if $limit_rate;
+
+for ([m => 60], [h => 60 * 60], [d => 24 * 60 * 60], [w => 7 * 24 * 60 * 60], [mo => 30 * 24 * 60 * 60], [y => 365.25 * 24 * 60 * 60])
+{
+    $expire_time = $1 * $_->[1] if $expire_time =~ /^(-?\d+)$_->[0]$/;
+}
 
 
 # run a sanity check if $home/.awsrc doesn't exists, or if it was requested
@@ -188,34 +215,34 @@ if (!-e "$home/.awsrc" || $sanity_check)
 {
     if (!$silent)
     {
-	if (!-e $secretsfile)
+	if (!-e $secrets_file)
 	{
-	    warn "sanity-check: \"$secretsfile\": file is missing\n";
+	    warn "sanity-check: \"$secrets_file\": file is missing\n";
 	}
-	elsif (!-r $secretsfile)
+	elsif (!-r $secrets_file)
 	{
-	    warn "sanity-check: \"$secretsfile\": file is not readable\n";
+	    warn "sanity-check: \"$secrets_file\": file is not readable\n";
 	}
 	elsif ($ENV{OS} !~ /windows/i)
 	{
-	    my $stat = (stat $secretsfile)[2] & 0777;
+	    my $stat = (stat $secrets_file)[2] & 0777;
 	    
 	    if (($stat & 0477) != 0400)
 	    {
 		my @perm = (qw(x r w)) x 4;
 		my $perm = join("", map {my $s = shift @perm; $_? $s: "-"} (split//, (unpack("B*", pack("n", $stat))))[6 .. 15]);
-		warn "sanity-check: \"$secretsfile\": file permissions are $perm.  Should be -rw-------\n";
+		warn "sanity-check: \"$secrets_file\": file permissions are $perm.  Should be -rw-------\n";
 	    }
 	}
     }
 
     use Time::Local;
-    my $aws = qx[curl --silent $insecureaws $fail --dump-header - https://s3.amazonaws.com/];
+    my $aws = qx[curl --silent $insecureaws $fail --dump-header - $scheme://s3.amazonaws.com/];
     my($d, $mon, $y, $h, $m, $s) = $aws =~ /^Date: ..., (..) (...) (....) (..):(..):(..) GMT\r?$/m;
 
     if (!$d)
     {
-	$aws = qx[curl --silent --insecure $fail --dump-header - https://s3.amazonaws.com/];
+	$aws = qx[curl --silent --insecure $fail --dump-header - $scheme://s3.amazonaws.com/];
 	($d, $mon, $y, $h, $m, $s) = $aws =~ /^Date: ..., (..) (...) (....) (..):(..):(..) GMT\r?$/m;
 	if ($d)
 	{
@@ -229,8 +256,8 @@ if (!-e "$home/.awsrc" || $sanity_check)
 
     $mon = {Jan => 0, Feb => 1, Mar => 2, Apr => 3, May => 4, Jun => 5, Jul => 6, Aug => 7, Sep => 8, Oct => 9, Nov => 10, Dec => 11}->{$mon};
     my $t = timegm($s, $m, $h, $d, $mon, $y);
-    $time_offset = time - $t;
-    warn "sanity-check: Your system clock is @{[abs($time_offset)]} seconds @{[$time_offset < 0? 'behind': 'ahead']}.\n" if !$silent && abs($time_offset) > 5;
+    $time_offset = $t - time;
+    warn "sanity-check: Your system clock is @{[abs($time_offset)]} seconds @{[$time_offset > 0? 'behind': 'ahead']}.\n" if !$silent && abs($time_offset) > 5;
 }
 
 
@@ -269,26 +296,27 @@ if ($install)
 {
     die "Usage: .../aws --install\n" if $install && @argv;
     
-    my $path = $0;
-
-    chmod 0555, $path;
-
-    if ($0 !~ /^\//)
-    {
-	chomp(my $dir = qx[pwd]);
-	$path = "$dir/$0";
-    }
-
     if (-w "/usr/bin")
     {
-	symlink($path, "/usr/bin/aws");
-	chdir "/usr/bin";
-	make_links("aws");
-	exit;
+	chomp(my $dir = qx[pwd]);
+	my $path = $0;
+	$path = "$dir/$0" if $0 !~ /^\//;
+
+	if ($dir !~ /^\/usr\/bin$/)
+	{
+	    print STDERR "copying aws to /usr/bin/\n";
+	    my $aws = load_file($0);
+	    die "installation failed (can't load script)\n" unless $aws;
+	    unlink "/usr/bin/aws";
+	    save_file("/usr/bin/aws", $aws);
+	    die "installation failed (can't copy script)\n" unless load_file("/usr/bin/aws") eq $aws;
+	    chmod 0555, "/usr/bin/aws";
+	    chdir "/usr/bin";
+	}
     }
 
-    make_links($path);
-
+    chmod 0555, $0;
+    make_links($0);
     die "installation failed\n";
 }
 
@@ -372,7 +400,7 @@ if (!exists $cmd{$cmd})
 	$output .= " $cmd";
     }
     $output .= "\n";
-    $output .= "aws version: v$program_version\n";
+    $output .= "aws version: v$program_version  (protocol version $aws_version)\n";
     die $output;
 }
 
@@ -458,7 +486,7 @@ if (!exists $cmd{$cmd})
 
 	for (;;)
 	{
-	    my $r = s3($action, $marker, (grep(!/^(?:x-amz-|Content-|Expires:)/i, @argv))[0, 1], grep(/^(?:x-amz-|Content-|Expires:)/i, @argv));
+	    my $r = s3($action, $marker, (grep(!/^(?:x-amz-|Cache-|Content-|Expires:|If-|Range:)/i, @argv))[0, 1], grep(/^(?:x-amz-|Cache-|Content-|Expires:|If-|Range:)/i, @argv));
 	    $r =~ s/<\?xml.*?>\r?\s*//;
 	    $result .= $r;
 	    ($marker) = $r =~ /.*<Key>(.*?)<\/Key>/;
@@ -779,7 +807,7 @@ sub s3
 {
     my($verb, $marker, $name, $file, @header) = @_;
 
-    my $expires = time + 30 - $time_offset;
+    my $expires = time + ($expire_time || 30) + $time_offset;
 
     if ($verbose)
     {
@@ -869,16 +897,16 @@ sub s3
     }
 
     my($vhost, $vname) = ("s3.amazonaws.com", $name);
-    ($vhost, $vname) = ("$1.$vhost", $2) if $name =~ /^([0-9a-z][\.\-0-9a-z]{1,61}[0-9a-z])(?:\/(.*))?$/;
+    ($vhost, $vname) = ($dns_alias? $1: "$1.$vhost", $2) if $name =~ /^([0-9a-z][\.\-0-9a-z]{1,61}[0-9a-z])(?:\/(.*))?$/;
     print STDERR "vhost=$vhost  vname=$vname\n" if $v;
 
     my $isGETobj = $verb eq GET && $name =~ /\/./ && $name !~ /\?/;
 
-    if ($isGETobj && !$fail)
+    if ($isGETobj && !$fail && !$request)
     {
 	my $data = "HEAD\n\n\n$expires\n/$name";
 	my($sig, $awskey) = sign($data);
-	my $url = "https://$vhost/$vname@{[$vname =~ /\?/? '&': '?']}AWSAccessKeyId=@{[encode_url($awskey)]}&Expires=$expires&Signature=@{[encode_url($sig)]}";
+	my $url = "$scheme://$vhost/$vname@{[$vname =~ /\?/? '&': '?']}AWSAccessKeyId=@{[encode_url($awskey)]}&Expires=$expires&Signature=@{[encode_url($sig)]}";
 	my $cmd = qq[curl --silent $verbose $insecureaws --header "Expect: " --head @{[cq($url)]}];
 	print STDERR "$cmd\n" if $v;
 	my $head = qx[$cmd];
@@ -910,10 +938,19 @@ sub s3
 
     my $header = join("\n", sort(map {s/^(.*?):\s*/\L$1:/s; $_} grep /^x-amz-/, @header), "") if @header;
     my $data = "$verb\n$content_md5\n$content_type\n$expires\n$header/$name";
+    $data =~ s/([\ \#])/%@{[unpack(H2,$1)]}/g;
     my($sig, $awskey) = sign($data);
-    my $url = "https://$vhost/$vname@{[$vname =~ /\?/? '&': '?']}AWSAccessKeyId=@{[encode_url($awskey)]}&Expires=$expires&Signature=@{[encode_url($sig)]}";
+    my $url = "$scheme://$vhost/$vname@{[$vname =~ /\?/? '&': '?']}AWSAccessKeyId=@{[encode_url($awskey)]}&Expires=$expires&Signature=@{[encode_url($sig)]}";
     $url .= "&marker=$marker" if $marker;
     $url .= "&prefix=$prefix" if $prefix;
+    $url =~ s/([\ \#])/%@{[unpack(H2,$1)]}/g;
+
+    my($sig, $awskey) = sign($data);
+
+    if ($request)
+    {
+	return $url;
+    }
 
     my($content);
     $content = "--upload-file @{[cq($file)]}" if $file;
@@ -931,17 +968,17 @@ sub s3
     }
 
     my $content_length = "--header 'Content-Length: $length'" if $length;
+    my $header = join(" --header ", undef, map {cq($_)} @header);
 
     if ($isGETobj)
     {
-	my $cmd = qq[curl --silent $fail $verbose $insecureaws --header "Expect: " --request $verb $content --location @{[cq($url)]}];
+	my $cmd = qq[curl --silent $fail $verbose $insecureaws $limit_rate --header "Expect: " $header --request $verb $content --location @{[cq($url)]}];
 	print STDERR "$cmd\n" if $v;
 	exec $cmd;
 	return;
     }
 
-    my $header = join(" --header ", undef, map {cq($_)} @header);
-    my $cmd = qq[curl --silent $fail $verbose $insecureaws --header "Expect: " $header --request $verb --dump-header - $content --location @{[cq($url)]}];
+    my $cmd = qq[curl --silent $fail $verbose $insecureaws $limit_rate --header "Expect: " $header --request $verb --dump-header - $content --location @{[cq($url)]}];
 
     print STDERR "$cmd\n" if $v;
     my $item = qx[$cmd];
@@ -954,10 +991,10 @@ sub s3
 
 sub ec2
 {
-    my($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = gmtime(time - $time_offset);
+    my($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = gmtime(time + $time_offset);
     my $timestamp = sprintf "%04d-%02d-%02dT%02d:%02d:%02dZ", 1900 + $year, $mon + 1, $mday, $hour, $min, $sec;
 
-    my %data = (AWSAccessKeyId => _, SignatureVersion => 1, Timestamp => $timestamp, Version => "2008-05-05", @_);
+    my %data = (AWSAccessKeyId => _, SignatureVersion => 1, Timestamp => $timestamp, Version => $aws_version, @_);
 
     my($url);
 
@@ -971,7 +1008,7 @@ sub ec2
 
     my($sig, $awskey) = sign($data);
     $url =~ s/AWSAccessKeyId=_/AWSAccessKeyId=$awskey/;
-    $url = "https://ec2.amazonaws.com/?Signature=@{[encode_url($sig)]}" . $url;
+    $url = "$scheme://ec2.amazonaws.com/?Signature=@{[encode_url($sig)]}" . $url;
     local($/);
     qx[curl --silent $fail $verbose $insecureaws @{[cq($url)]}];
 }
@@ -994,6 +1031,14 @@ sub load_file
 	or die "$fn: $!\n";
     local($/);
     <$io>;
+}
+
+sub save_file
+{
+    my $nfn = my $fn = shift;
+    $nfn = ">$fn" if $fn !~ /^\s*[\>\|]/;
+    my $out = IO::File->new($nfn) or die "$fn: $!\n";
+    print $out join("", @_);
 }
 
 
@@ -1022,14 +1067,14 @@ sub sign
 
     unless ($awskey || $secret || $signurl)
     {
-	($awskey, $secret, $signurl) = split(' ', load_file($secretsfile));
+	($awskey, $secret, $signurl) = split(' ', load_file($secrets_file));
     }
 
     die if $signurl =~ /\'/;
 
     $data =~ s/AWSAccessKeyId_/AWSAccessKeyId$awskey/;
 
-    if ($v >= 2)
+    if ($v)
     {
 	(my $pretty = $data) =~ s/\n/\\n/sg;
 	print STDERR "data = $pretty\n";
@@ -1043,7 +1088,7 @@ sub sign
 	my $s = qx[curl --silent $fail $insecsign --data @{[cq($data)]} @{[cq($signurl)]}];
 	#S9pr7y07SGtgt7OKjMxMYBy+LCk=
 	#1B5JPHYQCXW13GWKHAG2
-	die "bad signature from remote signing service (perhaps the password is bad?)\n$s\n" unless $s =~ /^[A-Z0-9\+\/\=\n]+$/i;
+	die "bad signature [$s] from remote signing service (perhaps the password is bad?)\n$s\n" unless $s =~ /^[A-Z0-9\+\/\=\n]+$/i;
 	return (split(/\n/, $s));
     }
 

@@ -27,7 +27,7 @@ use Test::More tests => 18;
 use Data::Customer;
 Data::Customer->connect();
 
-# Store and retrieve a object to check all fields
+# Store and retrieve an object to check all fields
 
 my $inserted = Data::Customer->new( %object );
 $inserted->insert();

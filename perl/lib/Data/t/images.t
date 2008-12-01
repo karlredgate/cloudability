@@ -19,7 +19,7 @@ use Test::More tests => 10;
 use Data::Image;
 Data::Image->connect();
 
-# Store and retrieve a object to check all fields
+# Store and retrieve an object to check all fields
 
 my $inserted = Data::Image->new( %object );
 $inserted->insert();

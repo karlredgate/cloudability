@@ -21,7 +21,7 @@ use Test::More tests => 12;
 use Data::Account;
 Data::Account->connect();
 
-# Store and retrieve a object to check all fields
+# Store and retrieve an object to check all fields
 
 my $inserted = Data::Account->new( %object );
 $inserted->insert();

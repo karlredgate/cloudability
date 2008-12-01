@@ -28,7 +28,8 @@ while (<STATUS>)
 }
 close STATUS;
 
-system("$cloudserver -start") if $return_code;
+system "$cloudserver -start" if $return_code;
+
 exit $return_code;
 __END__
 

@@ -28,10 +28,12 @@ $VERSION = "1.0";
 
 use strict;
 use Constants::AWS;
+use Data::Address;
 use Data::Image;
 use Data::Instance;
 use Data::Snapshot;
 use Data::Volume;
+use Utils::Time;
 use Utils::LogFile;
 {
     # Class static properties
@@ -58,6 +60,7 @@ sub new
     my $self = {
         aws_owner_id    => $aws_owner_id,
         account_id      => 0, # see the command() method below
+        init_file       => '', # see the command() method below
         log_file        => Utils::LogFile->new("$ENV{LOGS_DIR}/aws"),
     };
 
@@ -80,37 +83,68 @@ Run an AWS command and parse the results
 sub command
 {
     my ($self, $cmd, $account_id) = @_;
-    die "bad command \"$cmd\"" if $cmd =~ /;&&|\||\`/;
+    die "bad command \"$cmd\"" if $cmd =~ /;|&|\||`|>|</; # no ";&|`><" allowed
     $self->{log_file}->info("Command $cmd");
     $self->{account_id} = $account_id || 0;
 
     my $objects = [];
-    if ($cmd =~ /^(run|run-instances?|tin|terminate-instances?)/)
+    if ($cmd =~ /^(allad|allocate-address)/)
     {
+        $objects = $self->parse_aws_command($cmd, 'publicIp');
+        $self->check_for_error($objects);
+        $self->sync_addresses($objects);
+    }
+    elsif ($cmd =~ /^(aad|associate-address|disad|disassociate-address)/)
+    {
+        $objects = $self->parse_aws_command($cmd);
+        $self->check_for_error($objects);
+        $objects = $self->parse_aws_command('din'); # there's a new public DNS
+        $self->sync_instances($objects);
+    }
+    elsif ($cmd =~ /^(rad|release-address)\s+(\S+)/)
+    {
+        $objects = $self->parse_aws_command($cmd);
+        $self->check_for_error($objects);
+        my $address = Data::Address->find_by_public_ip($2);
+        $address->soft_delete() if $address->{id};
+    }
+    elsif ($cmd =~ /^(run|run-instances?|tin|terminate-instances?)/)
+    {
+        $self->{init_file} = $1 if $cmd =~ /-d\s+(\S+)/;
         $objects = $self->parse_aws_command($cmd, 'instanceId');
+        $self->check_for_error($objects);
         $self->sync_instances($objects);
     }
     elsif ($cmd =~ /^(csnap|create-snapshot)/)
     {
         $objects = $self->parse_aws_command($cmd, 'snapshotId');
+        $self->check_for_error($objects);
         $self->sync_snapshots($objects);
     }
     elsif ($cmd =~ /^(delsnap|delete-snapshot)\s+(\S+)/)
     {
-        system "$_AWS_CMD $cmd > /dev/null";
+        $objects = $self->parse_aws_command($cmd);
+        $self->check_for_error($objects);
         my $snapshot = Data::Snapshot->find_by_aws_snapshot_id($2);
         $snapshot->soft_delete() if $snapshot->{id};
     }
     elsif ($cmd =~ /^(attvol|attach-volume|cvol|create-volume|detvol|detach-volume)/)
     {
         $objects = $self->parse_aws_command($cmd, 'volumeId');
+        $self->check_for_error($objects);
         $self->sync_volumes($objects);
     }
     elsif ($cmd =~ /^(delvol|delete-volume)\s+(\S+)/)
     {
-        system "$_AWS_CMD $cmd > /dev/null";
+        $objects = $self->parse_aws_command($cmd);
+        $self->check_for_error($objects);
         my $volume = Data::Volume->find_by_aws_volume_id($2);
         $volume->soft_delete() if $volume->{id};
+    }
+    else
+    {
+        $self->{log_file}->error("command \"$cmd\" could not be parsed");
+        die "command \"$cmd\" could not be parsed";
     }
 
     # Return the object list from a sync command
@@ -130,6 +164,9 @@ sub syncronize
 
     my $images = $self->parse_aws_command('dim -o ' . $self->{aws_owner_id});
     $self->sync_images($images);
+
+    my $addresses = $self->parse_aws_command('dad', 'publicIp');
+    $self->sync_addresses($addresses);
 
     my $instances = $self->parse_aws_command('din', 'instanceId');
     $self->sync_instances($instances);
@@ -229,6 +266,23 @@ sub copy_object
     }
 }
 
+=item check_for_error($objects)
+
+Check an object list to see if we've got an error message as the first object
+
+=cut
+sub check_for_error
+{
+    my ($self, $objects) = @_;
+    my $error = $objects->[0] or return;
+    if ($error->{error_code})
+    {
+        my $message = "$error->{error_code}: $error->{error_message}";
+        $self->{log_file}->error($message);
+        die "error $message";
+    }
+}
+
 =item sync_images($images)
 
 Syncronize a list of images with the database
@@ -253,6 +307,34 @@ sub sync_images
         }
     }
     Data::Image->disconnect();
+}
+
+=item sync_addresses($addresses)
+
+Syncronize a list of addresses with the database
+
+=cut
+sub sync_addresses
+{
+    my ($self, $addresses) = @_;
+
+    Data::Address->connect();
+    foreach my $address (@{$addresses})
+    {
+        my $found = Data::Address->select('aws_public_ip = ?', $address->{aws_public_ip});
+        if ($found->{id})
+        {
+            # Nothing to do - the only field is the public IP address
+        }
+        else
+        {
+            $address->{account_id} = $self->{account_id} || 0;
+            $address->{created_at} = Utils::Time->get_date_time();
+            $address->{status} = Constants::AWS::STATUS_ACTIVE;
+            Data::Address->new(%{$address})->insert();
+        }
+    }
+    Data::Address->disconnect();
 }
 
 =item sync_instances($instances)
@@ -292,6 +374,7 @@ sub sync_instances
         else
         {
             $instance->{account_id} = $self->{account_id} || 0;
+            $instance->{init_file} = $self->{init_file} || Constants::AWS::INIT_FILE;
             $found = Data::Instance->new(%{$instance});
             $found->insert();
         }
@@ -367,7 +450,7 @@ sub sync_volumes
 
 =head1 DEPENDENCIES
 
-Constants::AWS, Data::Image, Data::Instance, Data::Snapshot, Data::Volume, Utils::LogFile
+Constants::AWS, Data::Image, Data::Instance, Data::Snapshot, Data::Volume, Utils::Time, Utils::LogFile
 
 =head1 AUTHOR
 

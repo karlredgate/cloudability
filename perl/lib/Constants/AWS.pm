@@ -26,10 +26,16 @@ $VERSION = "1.0";
 
 use strict;
 
+# The default file used to initialize servers
+
+use constant INIT_FILE => 'init.sh';
+
 # Translate Amazon AWS fields to local names
 # Note that "PARSE" causes recursive parsing
 
 use constant FIELDS => {
+    Code            => 'error_code',
+    Message         => 'error_message',
     architecture    => 'aws_architecture',
     attachTime      => 'aws_attached_at',
     attachmentSet   => 'PARSE',
@@ -56,8 +62,11 @@ use constant FIELDS => {
     privateDnsName  => 'aws_private_dns',
     placement       => 'PARSE',
     progress        => 'aws_progress',
+    publicIp        => 'aws_public_ip',
     ramdiskId       => 'aws_ramdisk_id',
     reason          => 'aws_term_reason',
+    requestId       => 'aws_request_id',
+    return          => 'aws_return',
     shutdownState   => 'PARSE',
     size            => 'aws_size',
     snapshotId      => 'aws_snapshot_id',

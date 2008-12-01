@@ -1,5 +1,25 @@
 #!/usr/bin/env perl
 
+=head1 NAME
+
+cloudjob.pl - Execute a cloud job then update its CloudJob database object
+
+=head1 SYNOPSIS
+
+Use this program to execute a cloud job and upadte its database object state.
+
+cloudjob.pl CLOUD_JOB_ID COMMAND
+
+ Options:
+  CLOUD_JOB_ID    the ID of the cloud job in the database
+  COMMAND         the command to run
+
+=head1 DESCRIPTION
+
+B<cloudjob.pl> executes a cloud job then updates its CloudJob database object
+
+=cut
+
 use strict;
 
 BEGIN {

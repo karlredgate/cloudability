@@ -2,43 +2,33 @@
 
 =head1 NAME
 
-cloudengine.pl - Run the CloudEngine server module to execute cloud jobs
-
-=head1 SYNOPSIS
-
-Use this program to run the CloudEngien server and execute cloud jobs.
-
-cloudengine.pl
-
- Options: None
+aws_sync - Sync the Cloudability database with Amazon AWS resources
 
 =head1 DESCRIPTION
 
-B<cloudengine.pl> runs the CloudEngine server module to execute cloud jobs
+This program syncs the Cloudability database with Amazon AWS resources.
 
 =cut
 
 use strict;
+use warnings;
 
-BEGIN {
-    $ENV{CLOUDABILITY_HOME} ||= $ENV{HOME} . '/cloudability';
-    require "$ENV{CLOUDABILITY_HOME}/perl/env.pl";
-}
+my $_AWS_CMD = "$ENV{CLOUDABILITY_HOME}/perl/aws.pl";
 
-use lib "$ENV{CLOUDABILITY_HOME}/perl/lib";
-use Servers::CloudEngine;
-my $cloud_engine = Servers::CloudEngine->new();
-$cloud_engine->run();
+# Sync the Cloudability database with Amazon AWS resources
 
+system "$_AWS_CMD 0 sync"; # remember only the master server syncs
+
+exit 0; # success
 __END__
 
 =head1 DEPENDENCIES
 
-Servers::CloudEngine
+The Cloudability perl program "~/perl/aws.pl"
 
 =head1 AUTHOR
 
-Kevin Hutchinson <kevin.hutchinson@legendum.com>
+Kevin Hutchinson (kevin.hutchinson@legendum.com)
 
 =head1 COPYRIGHT
 

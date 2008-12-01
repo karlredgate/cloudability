@@ -16,7 +16,7 @@ use Test::More tests => 7;
 use Data::AccountToken;
 Data::AccountToken->connect();
 
-# Store and retrieve a object to check all fields
+# Store and retrieve an object to check all fields
 
 my $inserted = Data::AccountToken->new( %object );
 $inserted->insert();

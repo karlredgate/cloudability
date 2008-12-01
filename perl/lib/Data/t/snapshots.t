@@ -9,13 +9,17 @@ my %object = (
     aws_status      => 'aws_status',
     aws_started_at  => '2008-11-25 12:34:56',
     aws_progress    => '100%',
+    name            => 'name',
+    description     => 'description',
+    deleted_at      => '2008-11-30 12:34:56',
+    status          => 'D',
 );
 
-use Test::More tests => 6;
+use Test::More tests => 10;
 use Data::Snapshot;
 Data::Snapshot->connect();
 
-# Store and retrieve a object to check all fields
+# Store and retrieve an object to check all fields
 
 my $inserted = Data::Snapshot->new( %object );
 $inserted->insert();

@@ -17,14 +17,17 @@ my %object = (
     aws_started_at  => '2008-11-24 00:00:00',
     aws_finished_at => '2008-11-24 23:59:59',
     aws_term_reason => 'aws_term_reason',
-    status          => 'L',
+    name            => 'name',
+    description     => 'description',
+    init_file       => 'init_file',
+    status          => 'R',
 );
 
-use Test::More tests => 15;
+use Test::More tests => 18;
 use Data::Instance;
 Data::Instance->connect();
 
-# Store and retrieve a object to check all fields
+# Store and retrieve an object to check all fields
 
 my $inserted = Data::Instance->new( %object );
 $inserted->insert();

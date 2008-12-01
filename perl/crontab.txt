@@ -1,0 +1,3 @@
+# This is a suggested crontab file for your Cloudability installation
+# Change the path according to the place where you installed the code
+0,10,20,30,40,50 * * * * $HOME/cloudability/perl/monitor.pl
