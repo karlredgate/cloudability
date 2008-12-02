@@ -387,7 +387,7 @@ sub sync_instances
 
             $self->copy_object($instance, $found);
             $found->update();
-            $found->init_host() if $needs_to_init;
+            $found->init_host($_AWS_CMD) if $needs_to_init;
         }
         else
         {

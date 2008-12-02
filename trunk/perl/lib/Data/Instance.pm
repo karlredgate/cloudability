@@ -168,14 +168,14 @@ sub find_by_aws_instance_id
     return $instance;
 }
 
-=item init_host()
+=item init_host($aws_cmd)
 
-Initialize a host that has just started running
+Initialize a host that has just started running by running an init file
 
 =cut
 sub init_host
 {
-    my ($self) = @_;
+    my ($self, $aws_cmd) = @_;
     return if $self->{status} ne Constants::AWS::STATUS_RUNNING;
     die "no AWS public DNS host name" unless $self->{aws_public_dns};
 
@@ -184,8 +184,15 @@ sub init_host
     open (INIT, "$ENV{INIT_DIR}/$init_file") or die "no init file";
     while (my $command = <INIT>)
     {
-        $command =~ s/KEY/$ENV{AWS_KEY_FILE}/g;
+        # Substitute "INSTANCE", "HOST", "KEY" and "AWS" in the command line
+
+        $command =~ s/INSTANCE/$self->{aws_instance_id}/g;
         $command =~ s/HOST/$self->{aws_public_dns}/g;
+        $command =~ s/KEY/$ENV{AWS_KEY_FILE}/g;
+        $command =~ s/AWS/$aws_cmd $self->{account_id}/g;
+
+        # Run the command line
+
         system $command;
     }
     close INIT;
