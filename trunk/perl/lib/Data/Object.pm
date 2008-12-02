@@ -49,7 +49,7 @@ table must have an auto_increment column as its primary key.
 
 Data::Object provides database connectivity via connect() and disconnect(),
 object creation via methods new(), select() and next(), and object/database
-syncronisation via methods insert(), update() and delete().
+synchronisation via methods insert(), update() and delete().
 
 Data::Object does not check whether objects were modified in the database while
 they were being modified in your Perl program. Nor does it support any locking
@@ -77,7 +77,7 @@ use DBI;
     my $_Cache = {};        # Database connection cache, keyed by database
 
     my $_IdField = {};      # Primary key for uniquely identifying objects
-    my $_Fields  = {};      # Fields to be syncronised with the database
+    my $_Fields  = {};      # Fields to be synchronised with the database
     my $_Tables  = {};      # Table names corresponding to our class names
     my $_Queries = {};      # User-defined queries for select() and next()
 
@@ -228,7 +228,7 @@ sub class2table
 
 Setup a list of fields to keep in sync with the database. The first field
 should be the "id" field followed by the fields that you want to keep
-syncronised with the database. Call fields() immediately after calling
+synchronised with the database. Call fields() immediately after calling
 connect() if you didn't provide a field list when you called connect().
 Use an id field name of "null" if there is no auto increment id field.
 
@@ -238,7 +238,7 @@ sub fields
     my ($self, @fields) = @_;
     my $class = ref($self) || $self;
 
-    # Set the syncronized fields for the class
+    # Set the synchronized fields for the class
 
     @fields = map { uc($_) } @fields if $_Drivers->{$class} =~ /oracle/i;
     $_Fields->{$class} = [@fields];
@@ -271,26 +271,6 @@ sub fields
 
     $_Inserts->{$class} = $dbh->prepare("insert into $table ($field_list) values ($value_list)");
     $_Updates->{$class} = $dbh->prepare("update $table set $update_list where $id_field = ?");
-}
-
-=item <fieldname>('value')
-
-Get/set an object's field value in a driver independent manner.
-
-=cut
-sub AUTOLOAD
-{
-    my ($self, $value) = @_;
-    my $class = ref($self);
-
-    no strict;
-    my $field = $1 if $AUTOLOAD =~ /::(\w+)$/;
-    use strict;
-    return if $field eq "DESTROY";
-
-    $field = uc($field) if $_Drivers->{$class} =~ /oracle/i;
-    $self->{$field} = $value if defined($value);
-    return $self->{$field};
 }
 
 =item new(field1=>'value1', field2=>'value2', ...)

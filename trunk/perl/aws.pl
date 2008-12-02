@@ -45,7 +45,7 @@ if ($cmd eq 'sync')
 {
     die "Only $ENV{MASTER_SERVER} can sync the database with AWS"
         unless $ENV{MASTER_SERVER} =~ /^(localhost|$ENV{HOSTNAME})/;
-    $aws->syncronize();
+    $aws->sync_with_aws();
 }
 else
 {

@@ -1,10 +1,12 @@
-#!/usr/bin/env perl -w
+#!/usr/bin/env perl
 
 use strict;
+use warnings;
 
 my %object = (
     account_id      => 1,
     aws_public_ip   => 'aws_public_ip',
+    aws_instance_id => 'aws_instance_id',
     name            => 'name',
     description     => 'description',
     created_at      => '2008-11-30 11:22:33',
@@ -12,7 +14,7 @@ my %object = (
     status          => 'D',
 );
 
-use Test::More tests => 7;
+use Test::More tests => 8;
 use Data::Address;
 Data::Address->connect();
 
