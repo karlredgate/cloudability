@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-Clients::AWS -  Syncronize the Cloudability database with AWS information
+Clients::AWS -  Synchronize the Cloudability database with AWS information
                 and run AWS commands to manage AWS resources (start/stop).
 
 =head1 VERSION
@@ -11,7 +11,7 @@ This document refers to version 1.0 of Clients::AWS, released Nov 26, 2008
 
 =head1 DESCRIPTION
 
-Clients::AWS syncronizes the Cloudability database with AWS information
+Clients::AWS synchronizes the Cloudability database with AWS information
 and runs AWS commands to manage AWS system resources (e.g. start/stop).
 
 =head2 Properties
@@ -38,7 +38,7 @@ use Utils::LogFile;
 {
     # Class static properties
 
-    my $_AWS_CMD = '/usr/bin/aws';
+    my $_AWS_CMD = "$ENV{CLOUDABILITY_HOME}/bin/aws";
 
 =head2 Class Methods
 
@@ -67,6 +67,17 @@ sub new
     # Return the new Clients::AWS object
 
     bless $self, $class;
+}
+
+=item set_aws_cmd($aws_cmd)
+
+Set the AWS command, for example use a "mock" command for unit testing
+
+=cut
+sub set_aws_cmd
+{
+    my ($class, $aws_cmd) = @_;
+    $_AWS_CMD = $aws_cmd;
 }
 
 =back
@@ -152,15 +163,15 @@ sub command
     return $objects;
 }
 
-=item syncronize()
+=item sync_with_aws()
 
-Syncronize the Cloudability database with Amazon AWS information
+Synchronize the Cloudability database with Amazon AWS information
 
 =cut
-sub syncronize
+sub sync_with_aws
 {
     my ($self) = @_;
-    $self->{log_file}->info("Syncronizing images, instances, snapshots and volumes");
+    $self->{log_file}->info("Synchronizing images, instances, snapshots and volumes");
 
     my $images = $self->parse_aws_command('dim -o ' . $self->{aws_owner_id});
     $self->sync_images($images);
@@ -186,6 +197,9 @@ Return a sites data structure formatted as JSON
 sub parse_aws_command
 {
     my ($self, $cmd, $header) = @_;
+    $header ||= '';
+
+    # Run the AWS command to read data from Amazon
 
     open (AWS, "$_AWS_CMD $cmd|");
     my @data = grep /^[^+]/, <AWS>;
@@ -285,7 +299,7 @@ sub check_for_error
 
 =item sync_images($images)
 
-Syncronize a list of images with the database
+Synchronize a list of images with the database
 
 =cut
 sub sync_images
@@ -295,6 +309,8 @@ sub sync_images
     Data::Image->connect();
     foreach my $image (@{$images})
     {
+        $image->{aws_is_public} = $image->{aws_is_public} eq 'true' ? 'Y' : 'N';
+
         my $found = Data::Image->select('aws_image_id = ?', $image->{aws_image_id});
         if ($found->{id})
         {
@@ -306,12 +322,12 @@ sub sync_images
             Data::Image->new(%{$image})->insert();
         }
     }
-    Data::Image->disconnect();
+    #Data::Image->disconnect();
 }
 
 =item sync_addresses($addresses)
 
-Syncronize a list of addresses with the database
+Synchronize a list of addresses with the database
 
 =cut
 sub sync_addresses
@@ -334,12 +350,12 @@ sub sync_addresses
             Data::Address->new(%{$address})->insert();
         }
     }
-    Data::Address->disconnect();
+    #Data::Address->disconnect();
 }
 
 =item sync_instances($instances)
 
-Syncronize a list of instances with the database
+Synchronize a list of instances with the database
 
 =cut
 sub sync_instances
@@ -350,7 +366,9 @@ sub sync_instances
     foreach my $instance (@{$instances})
     {
         $instance->{status} = Constants::AWS::STATES->{$instance->{aws_inst_state}} || Constants::AWS::STATUS_UNKNOWN;
-        $instance->{aws_finished_at} = $1 if $instance->{aws_term_reason} =~ /\((.+) GMT\)/;
+        $instance->{aws_finished_at} = $1 if $instance->{aws_term_reason}
+                       && $instance->{aws_term_reason} =~ /\((.+) GMT\)/;
+        $instance->{aws_avail_zone} ||= '';
         $instance->{aws_public_dns} ||= '';
         $instance->{aws_private_dns} ||= '';
         my $found = Data::Instance->select('aws_instance_id = ?', $instance->{aws_instance_id});
@@ -383,12 +401,12 @@ sub sync_instances
 
         $found->know_host();
     }
-    Data::Instance->disconnect();
+    #Data::Instance->disconnect();
 }
 
 =item sync_snapshots($snapshots)
 
-Syncronize a list of snapshots with the database
+Synchronize a list of snapshots with the database
 
 =cut
 sub sync_snapshots
@@ -412,12 +430,12 @@ sub sync_snapshots
             Data::Snapshot->new(%{$snapshot})->insert();
         }
     }
-    Data::Snapshot->disconnect();
+    #Data::Snapshot->disconnect();
 }
 
 =item sync_volumes($volumes)
 
-Syncronize a list of volumes with the database
+Synchronize a list of volumes with the database
 
 =cut
 sub sync_volumes
@@ -441,7 +459,7 @@ sub sync_volumes
             Data::Volume->new(%{$volume})->insert();
         }
     }
-    Data::Volume->disconnect();
+    #Data::Volume->disconnect();
 }
 
 }1;

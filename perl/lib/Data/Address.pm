@@ -26,6 +26,10 @@ The IP address owner's account ID
 
 The public IP address
 
+=item aws_instance_id
+
+The AWS instance ID when the address is attached to an instance
+
 =item name
 
 A user-assigned name for the IP address, for example "Acme main public IP"
@@ -82,7 +86,7 @@ sub connect
         $args{host} = $ENV{BACKUP_SERVER};
         $_Connection = $class->SUPER::connect(%args);
     }
-    $class->fields(qw(account_id aws_public_ip name description created_at deleted_at status));
+    $class->fields(qw(account_id aws_public_ip aws_instance_id name description created_at deleted_at status));
 
     return $_Connection;
 }

@@ -1,6 +1,7 @@
-#!/usr/bin/env perl -w
+#!/usr/bin/env perl
 
 use strict;
+use warnings;
 
 my %object = (
     aws_image_id    => 'aws_image_id',
@@ -12,10 +13,11 @@ my %object = (
     aws_type        => 'aws_type',
     aws_kernel_id   => 'aws_kernel_id',
     aws_ramdisk_id  => 'aws_ramdisk_id',
+    name            => 'name',
     description     => 'description',
 );
 
-use Test::More tests => 10;
+use Test::More tests => 11;
 use Data::Image;
 Data::Image->connect();
 

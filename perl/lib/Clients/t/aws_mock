@@ -1,0 +1,16 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+my $cmd = shift or die "no command";
+my $file = "$ENV{CLOUDABILITY_HOME}/perl/lib/Clients/t/out/aws.$cmd.out";
+die "no AWS mock output file" unless -f $file;
+
+# Just print the file
+
+open (OUT, $file);
+print while <OUT>;
+close OUT;
+
+__END__

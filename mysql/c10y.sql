@@ -47,6 +47,7 @@ create table if not exists addresses
     id              INTEGER UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     account_id      INTEGER UNSIGNED NOT NULL,
     aws_public_ip   VARCHAR(255) NOT NULL,
+    aws_instance_id VARCHAR(255),
     name            VARCHAR(255),
     description     MEDIUMTEXT,
     created_at      DATETIME,

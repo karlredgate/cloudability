@@ -1,0 +1,8 @@
++--------------+--------------------------------------------------+------------+--------------+----------+--------------+-----------+--------------+--------------+
+|   imageId    |                  imageLocation                   | imageState | imageOwnerId | isPublic | architecture | imageType |   kernelId   |  ramdiskId   |
++--------------+--------------------------------------------------+------------+--------------+----------+--------------+-----------+--------------+--------------+
+| ami-050de96c | cloudability-images/cloudability-02.manifest.xml | available  | 992046831893 | false    | i386         | machine   | aki-a71cf9ce | ari-a51cf9cc |
+| ami-09759160 | cloudability-images/cloudability-04.manifest.xml | available  | 992046831893 | false    | i386         | machine   | aki-a71cf9ce | ari-a51cf9cc |
+| ami-af7793c6 | cloudability-images/cloudability-05.manifest.xml | available  | 992046831893 | false    | i386         | machine   | aki-a71cf9ce | ari-a51cf9cc |
+| ami-f239dd9b | cloudability-images/cloudablity-00.manifest.xml  | available  | 992046831893 | false    | i386         | machine   | aki-a71cf9ce | ari-a51cf9cc |
++--------------+--------------------------------------------------+------------+--------------+----------+--------------+-----------+--------------+--------------+

@@ -19,17 +19,19 @@ $ENV{DB_DATABASE} = 'c10y_test';
 
 my $constants = 0;
 my $clients = 0;
+my $servers = 0;
 my $data = 0;
 my $utils = 0;
 my $all = 0;
 GetOptions("constants" => \$constants,
            "clients"   => \$clients,
+           "servers"   => \$servers,
            "data"      => \$data,
            "utils"     => \$utils,
            "all"       => \$all);
 
-die "usage: $0 --all --constants --clients --data --utils"
-    unless $all || $constants || $clients || $data || $utils;
+die "usage: $0 --all --constants --clients --servers --data --utils"
+    unless $all || $constants || $clients || $servers || $data || $utils;
 
 # Look in a perl lib directory for unit tests to run
 
@@ -47,6 +49,7 @@ sub unit_test
 
 unit_test('Constants') if $constants || $all;
 unit_test('Clients') if $clients || $all;
+unit_test('Servers') if $servers || $all;
 unit_test('Data') if $data || $all;
 unit_test('Utils') if $utils || $all;
 
