@@ -79,11 +79,12 @@ sub command
     my $account = $args{account} or die "no account";
 
     my $objects;
-    if ($command =~ /^(dim|describe-images|din|describe-instances|dsnap|describe-snapshots|dvol|describe-volumes)/)
+    if ($command =~ /^(dad|describe-addresses|dim|describe-images|din|describe-instances|dsnap|describe-snapshots|dvol|describe-volumes)/)
     {
         # Get resource data from the sync database
 
         $objects = $self->describe_images($account) if $command =~ /^(dim|describe-images)/;
+        $objects = $self->describe_addresses($account) if $command =~ /^(dad|describe-addresses)/;
         $objects = $self->describe_instances($account) if $command =~ /^(din|describe-instances)/;
         $objects = $self->describe_snapshots($account) if $command =~ /^(dsnap|describe-snapshots)/;
         $objects = $self->describe_volumes($account) if $command =~ /^(dvol|describe-volumes)/;
@@ -99,21 +100,26 @@ sub command
         my $has_snapshots = $quota->{max_snapshots} - $quota->snapshot_quota();
         my $has_volumes = $quota->{max_volumes} - $quota->volume_quota();
         my $object = {
+            # What are our AWS resource limits?
             max_addresses   => $quota->{max_addresses},
             max_instances   => $quota->{max_instances},
             max_snapshots   => $quota->{max_snapshots},
             max_volumes     => $quota->{max_volumes},
+
+            # How many AWS resources have we used?
             has_addresses   => $has_addresses,
             has_instances   => $has_instances,
             has_snapshots   => $has_snapshots,
             has_volumes     => $has_volumes,
-            account_ids     => { account_id => $quota->{account_ids} }, # XMLize
+
+            # What are the customer contact details?
             customer        => {
                 company     => $quota->{customer}{company},
                 contact     => $quota->{customer}{contact},
                 email       => $quota->{customer}{email},
                 tel_number  => $quota->{customer}{tel_number},
                 brand       => $quota->{customer}{brand},
+                account_ids => { account_id => $quota->{account_ids} }, # XMLize
             },
         };
         $objects = [ $object ];
@@ -189,11 +195,37 @@ sub describe_images
             $image->{id};
             $image = Data::Image->next())
     {
-        push @images, $image;
+        my $copy = {}; $self->copy_object($image, $copy); # unbless for JSON
+        push @images, $copy;
     }
     Data::Image->disconnect();
 
     return \@images;
+}
+
+=item describe_addresses($account)
+
+Return a list of address objects in our database sync of Amazon AWS resources
+
+=cut
+sub describe_addresses
+{
+    my ($self, $account) = @_;
+    $self->{object_type} = 'address';
+
+    my @addresses;
+    Data::Address->connect();
+    my $query = 'account_id = ?';
+    for (my $address = Data::Address->select($query, $account->{id});
+            $address->{id};
+            $address = Data::Address->next($query))
+    {
+        my $copy = {}; $self->copy_object($address, $copy); # unbless for JSON
+        push @addresses, $copy;
+    }
+    Data::Address->disconnect();
+
+    return \@addresses;
 }
 
 =item describe_instances($account)
@@ -213,7 +245,8 @@ sub describe_instances
             $instance->{id};
             $instance = Data::Instance->next($query))
     {
-        push @instances, $instance;
+        my $copy = {}; $self->copy_object($instance, $copy); # unbless for JSON
+        push @instances, $copy;
     }
     Data::Instance->disconnect();
 
@@ -237,6 +270,7 @@ sub describe_snapshots
             $snapshot->{id};
             $snapshot = Data::Snapshot->next($query))
     {
+        my $copy = {}; $self->copy_object($snapshot, $copy); # unbless for JSON
         push @snapshots, $snapshot;
     }
     Data::Snapshot->disconnect();
@@ -261,6 +295,7 @@ sub describe_volumes
             $volume->{id};
             $volume = Data::Volume->next($query))
     {
+        my $copy = {}; $self->copy_object($volume, $copy); # unbless for JSON
         push @volumes, $volume;
     }
     Data::Volume->disconnect();
