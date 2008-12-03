@@ -51,16 +51,16 @@ use Time::Local;
 
 =item get_time($date, $hh_mm_ss, $time_zone)
 
-Get the epoch time from a date (YYYYMMDD), time (HH:MM:SS) and time zone
+Get the epoch time from a date (YYYY-MM-DD), time (HH:MM:SS) and time zone
 
 =cut
 sub get_time
 {
     my ($class, $date, $hh_mm_ss, $time_zone) = @_;
-    die "no date (YYYYMMDD)" unless $date;
-    die "no time (HH:MM:SS)" unless $hh_mm_ss;
+    die "no date (YYYY-MM-DD)" unless $date =~ /^\d{4}-\d{2}-\d{2}$/;
+    die "no time (HH:MM:SS)" unless $hh_mm_ss =~ /^\d{2}:\d{2}:\d{2}$/;
     $time_zone ||= 0;
-    my ($year, $month, $mday) = ($1, $2, $3) if $date =~ /(....)(..)(..)/;
+    my ($year, $month, $mday) = ($1, $2, $3) if $date =~ /(....)-(..)-(..)/;
     my ($hour, $mins, $secs)  = ($1, $2, $3) if $hh_mm_ss =~ /(..):(..):(..)/;
 
     my $time = timegm(0, 0, 0, $mday, $month-1, $year-1900);
@@ -77,9 +77,9 @@ Get the epoch time range from a date (YYYYMMDD) and time zone
 sub get_time_range
 {
     my ($class, $date, $time_zone) = @_;
-    die "no date (YYYYMMDD)" unless $date;
+    die "no date (YYYY-MM-DD)" unless $date =~ /^\d{4}-\d{2}-\d{2}$/;
     $time_zone ||= 0;
-    my ($year, $month, $mday) = ($1, $2, $3) if $date =~ /(....)(..)(..)/;
+    my ($year, $month, $mday) = ($1, $2, $3) if $date =~ /(....)-(..)-(..)/;
 
     my $time = timegm(0, 0, 0, $mday, $month-1, $year-1900);
     my $start_time = $time - HOUR_SECS * $time_zone;
@@ -145,16 +145,16 @@ sub get_date_range
     if ($period eq 'week')
     {
         my ($year, $month, $mday) = (gmtime($time - 6*DAY_SECS))[YEAR, MONTH, MDAY];
-        $start_date = sprintf("%04d%02d%02d", $year+1900, $month+1, $mday);
+        $start_date = sprintf("%04d-%02d-%02d", $year+1900, $month+1, $mday);
         ($year, $month, $mday) = (gmtime($time))[YEAR, MONTH, MDAY];
-        $end_date = sprintf("%04d%02d%02d", $year+1900, $month+1, $mday);
+        $end_date = sprintf("%04d-%02d-%02d", $year+1900, $month+1, $mday);
         $period_name = 'Weekly';
     }
     elsif ($period eq 'month')
     {
         my ($year, $month, $mday) = (gmtime($time))[YEAR, MONTH, MDAY];
-        $end_date = sprintf("%04d%02d%02d", $year+1900, $month+1, $mday);
-        $start_date = substr($end_date, 0, 6) . '01';
+        $end_date = sprintf("%04d-%02d-%02d", $year+1900, $month+1, $mday);
+        $start_date = substr($end_date, 0, 8) . '01';
         $period_name = $_Months[$month];
     }
 
@@ -195,7 +195,7 @@ sub get_part_of_day
 {
     my ($class, $time_zone, $time) = @_;
     $time ||= time(); # for testing
-    my $date = $class->get_date($time, $time_zone); $date =~ s/-//g;
+    my $date = $class->get_date($time, $time_zone);
     my ($start_time, $end_time) = $class->get_time_range($date, $time_zone);
     return sprintf("%04.4f", ($time - $start_time) / DAY_SECS);
 }
@@ -212,7 +212,7 @@ sub get_day_of_week
     return (gmtime($time))[WDAY];
 }
 
-=item get_day_of_year($yyyymmdd)
+=item get_day_of_year($yyyy_mm_dd)
 
 Get the day of the year from a date in YYYYMMDD format
 

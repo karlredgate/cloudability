@@ -88,6 +88,36 @@ sub command
         $objects = $self->describe_snapshots($account) if $command =~ /^(dsnap|describe-snapshots)/;
         $objects = $self->describe_volumes($account) if $command =~ /^(dvol|describe-volumes)/;
     }
+    elsif ($command eq 'quota')
+    {
+        # Get the account holder's customer quota
+
+        $self->{object_type} = 'quota';
+        my $quota = Clients::Quota->new($account->{id});
+        my $has_addresses = $quota->{max_addresses} - $quota->address_quota();
+        my $has_instances = $quota->{max_instances} - $quota->instance_quota();
+        my $has_snapshots = $quota->{max_snapshots} - $quota->snapshot_quota();
+        my $has_volumes = $quota->{max_volumes} - $quota->volume_quota();
+        my $object = {
+            max_addresses   => $quota->{max_addresses},
+            max_instances   => $quota->{max_instances},
+            max_snapshots   => $quota->{max_snapshots},
+            max_volumes     => $quota->{max_volumes},
+            has_addresses   => $has_addresses,
+            has_instances   => $has_instances,
+            has_snapshots   => $has_snapshots,
+            has_volumes     => $has_volumes,
+            account_ids     => { account_id => $quota->{account_ids} }, # XMLize
+            customer        => {
+                company     => $quota->{customer}{company},
+                contact     => $quota->{customer}{contact},
+                email       => $quota->{customer}{email},
+                tel_number  => $quota->{customer}{tel_number},
+                brand       => $quota->{customer}{brand},
+            },
+        };
+        $objects = [ $object ];
+    }
     else
     {
         # Submit a cloud job for processing ASAP

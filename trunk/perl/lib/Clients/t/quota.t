@@ -113,7 +113,7 @@ my $instances = [
         aws_avail_zone  => 'us-east-1a',
         aws_kernel_id   => 'aki-a71cf9ce',
         aws_ramdisk_id  => 'ari-a51cf9cc',
-        status          => Constants::AWS::STATUS_ACTIVE,
+        status          => Constants::AWS::STATUS_RUNNING,
     },
 ];
 foreach my $instance (@{$instances})

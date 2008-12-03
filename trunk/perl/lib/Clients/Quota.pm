@@ -77,8 +77,12 @@ sub new
     # Make a new Clients::Quota object
 
     my $self = {
-        customer    => $customer,
-        account_ids => \@account_ids,
+        customer        => $customer,
+        account_ids     => \@account_ids,
+        max_addresses   => $customer->{max_addresses} || Constants::AWS::MAX_ADDRESSES,
+        max_instances   => $customer->{max_instances} || Constants::AWS::MAX_INSTANCES,
+        max_snapshots   => $customer->{max_snapshots} || Constants::AWS::MAX_SNAPSHOTS,
+        max_volumes     => $customer->{max_volumes} || Constants::AWS::MAX_VOLUMES,
     };
 
     # Return the new Clients::Quota object
@@ -113,7 +117,6 @@ sub address_quota
 {
     my ($self) = @_;
 
-    my $max_addresses = $self->{customer}{max_addresses} || Constants::AWS::MAX_ADDRESSES;
     my $has_addresses = 0;
     Data::Address->connect();
     my $query = $self->get_query();
@@ -123,7 +126,7 @@ sub address_quota
     {
         $has_addresses++ if $address->{status} eq Constants::AWS::STATUS_ACTIVE;
     }
-    return $max_addresses - $has_addresses;
+    return $self->{max_addresses} - $has_addresses;
 }
 
 =item instance_quota()
@@ -135,7 +138,6 @@ sub instance_quota
 {
     my ($self) = @_;
 
-    my $max_instances = $self->{customer}{max_instances} || Constants::AWS::MAX_INSTANCES;
     my $has_instances = 0;
     Data::Instance->connect();
     my $query = $self->get_query();
@@ -143,9 +145,9 @@ sub instance_quota
             $instance->{id};
             $instance = Data::Instance->next($query))
     {
-        $has_instances++ if $instance->{status} eq Constants::AWS::STATUS_ACTIVE;
+        $has_instances++ if $instance->{status} eq Constants::AWS::STATUS_RUNNING;
     }
-    return $max_instances - $has_instances;
+    return $self->{max_instances} - $has_instances;
 }
 
 =item snapshot_quota()
@@ -157,7 +159,6 @@ sub snapshot_quota
 {
     my ($self) = @_;
 
-    my $max_snapshots = $self->{customer}{max_snapshots} || Constants::AWS::MAX_SNAPSHOTS;
     my $has_snapshots = 0;
     Data::Snapshot->connect();
     my $query = $self->get_query();
@@ -167,7 +168,7 @@ sub snapshot_quota
     {
         $has_snapshots++ if $snapshot->{status} eq Constants::AWS::STATUS_ACTIVE;
     }
-    return $max_snapshots - $has_snapshots;
+    return $self->{max_snapshots} - $has_snapshots;
 }
 
 =item volume_quota()
@@ -179,7 +180,6 @@ sub volume_quota
 {
     my ($self) = @_;
 
-    my $max_volumes = $self->{customer}{max_volumes} || Constants::AWS::MAX_VOLUMES;
     my $has_volumes = 0;
     Data::Volume->connect();
     my $query = $self->get_query();
@@ -189,7 +189,7 @@ sub volume_quota
     {
         $has_volumes++ if $volume->{status} eq Constants::AWS::STATUS_ACTIVE;
     }
-    return $max_volumes - $has_volumes;
+    return $self->{max_volumes} - $has_volumes;
 }
 
 }1;
