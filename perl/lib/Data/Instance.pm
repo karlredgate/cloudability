@@ -190,6 +190,7 @@ sub init_host
         $command =~ s/HOST/$self->{aws_public_dns}/g;
         $command =~ s/KEY/$ENV{AWS_KEY_FILE}/g;
         $command =~ s/AWS/$aws_cmd $self->{account_id}/g;
+        $command =~ s/\s*#.*$//; # strip any line comments
 
         # Run the command line
 

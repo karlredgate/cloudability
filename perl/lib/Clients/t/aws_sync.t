@@ -72,7 +72,7 @@ my $volumes = {
 
 # Set the AWS object to use the "aws_mock" test command to read our "out" files
 
-Clients::AWS->set_aws_cmd("$ENV{CLOUDABILITY_HOME}/perl/lib/Clients/t/aws_mock");
+Clients::AWS->set_aws_command("$ENV{CLOUDABILITY_HOME}/perl/lib/Clients/t/aws_mock");
 my $aws = Clients::AWS->new();
 
 # Connect to the database

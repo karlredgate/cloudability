@@ -39,7 +39,8 @@ use Utils::LogFile;
 {
     # Class static properties
 
-    my $_AWS_CMD = "$ENV{CLOUDABILITY_HOME}/bin/aws";
+    my $_AWS_COMMAND = "$ENV{CLOUDABILITY_HOME}/bin/aws";
+    my $_AWS_WRAPPER = "$ENV{CLOUDABILITY_HOME}/perl/aws.pl"; # for init files
 
 =head2 Class Methods
 
@@ -70,15 +71,15 @@ sub new
     bless $self, $class;
 }
 
-=item set_aws_cmd($aws_cmd)
+=item set_aws_command($aws_command)
 
 Set the AWS command, for example use a "mock" command for unit testing
 
 =cut
-sub set_aws_cmd
+sub set_aws_command
 {
-    my ($class, $aws_cmd) = @_;
-    $_AWS_CMD = $aws_cmd;
+    my ($class, $aws_command) = @_;
+    $_AWS_COMMAND = $aws_command;
 }
 
 =back
@@ -112,7 +113,7 @@ sub command
     {
         $objects = $self->parse_aws_command($cmd);
         $self->check_for_error($objects);
-        $objects = $self->parse_aws_command('din'); # there's a new public DNS
+        $objects = $self->parse_aws_command('din', 'instanceId'); # for new DNS
         $self->sync_instances($objects);
     }
     elsif ($cmd =~ /^(rad|release-address)\s+(\S+)/)
@@ -142,7 +143,7 @@ sub command
     }
     elsif ($cmd =~ /^(delsnap|delete-snapshot)\s+(\S+)/)
     {
-        $objects = $self->parse_aws_command($cmd);
+        $objects = $self->parse_aws_command($cmd, 'snapshotId');
         $self->check_for_error($objects);
         my $snapshot = Data::Snapshot->find_by_aws_snapshot_id($2);
         $snapshot->soft_delete() if $snapshot->{id};
@@ -159,7 +160,7 @@ sub command
     }
     elsif ($cmd =~ /^(delvol|delete-volume)\s+(\S+)/)
     {
-        $objects = $self->parse_aws_command($cmd);
+        $objects = $self->parse_aws_command($cmd, 'volumeId');
         $self->check_for_error($objects);
         my $volume = Data::Volume->find_by_aws_volume_id($2);
         $volume->soft_delete() if $volume->{id};
@@ -213,7 +214,7 @@ sub parse_aws_command
 
     # Run the AWS command to read data from Amazon
 
-    open (AWS, "$_AWS_CMD $cmd|");
+    open (AWS, "$_AWS_COMMAND $cmd|");
     my @data = grep /^[^+]/, <AWS>;
     close AWS;
 
@@ -245,7 +246,8 @@ sub parse_aws_command
             my $value = $values[$i];
             if ($field eq 'PARSE')
             {
-                $self->parse_value($value, $object);
+                eval { $self->parse_value($value, $object); };
+                $self->{log_file}->error("$aws_field: $@") if $@;
             }
             else
             {
@@ -377,7 +379,8 @@ sub sync_instances
     Data::Instance->connect();
     foreach my $instance (@{$instances})
     {
-        $instance->{status} = Constants::AWS::STATES->{$instance->{aws_inst_state}} || Constants::AWS::STATUS_UNKNOWN;
+        $instance->{aws_inst_state} ||= 'unknown';
+        $instance->{status} = Constants::AWS::STATES->{$instance->{aws_inst_state}};
         $instance->{aws_finished_at} = $1 if $instance->{aws_term_reason}
                        && $instance->{aws_term_reason} =~ /\((.+) GMT\)/;
         $instance->{aws_avail_zone} ||= '';
@@ -399,7 +402,7 @@ sub sync_instances
 
             $self->copy_object($instance, $found);
             $found->update();
-            $found->init_host($_AWS_CMD) if $needs_to_init;
+            $found->init_host($_AWS_WRAPPER) if $needs_to_init;
         }
         else
         {
@@ -411,7 +414,8 @@ sub sync_instances
 
         # Make sure we know the instance's host for SSH commands
 
-        $found->know_host();
+        eval { $found->know_host(); };
+        $self->{log_file}->warn("know_host: $@") if $@;
     }
     #Data::Instance->disconnect();
 }
