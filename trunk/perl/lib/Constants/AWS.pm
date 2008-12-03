@@ -98,6 +98,13 @@ use constant STATES => {
     terminated      => Constants::AWS::STATUS_TERMINATED,
 };
 
+# Default resource limits for each customer
+
+use constant MAX_ADDRESSES          => 100;
+use constant MAX_INSTANCES          => 10;
+use constant MAX_SNAPSHOTS          => 20;
+use constant MAX_VOLUMES            => 20;
+
 =back
 
 =head1 DEPENDENCIES

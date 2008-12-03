@@ -90,6 +90,22 @@ The customer's X.509 certificate file name (for bundling new images)
 
 The customer's X.509 certificate file text (for bundling new images)
 
+=item max_addresses
+
+The maximum number of addresses this customer may allocate
+
+=item max_instances
+
+The maximum number of instances this customer may allocate
+
+=item max_snapshots
+
+The maximum number of snapshots this customer may allocate
+
+=item max_volumes
+
+The maximum number of volumes this customer may allocate
+
 =back
 
 =cut
@@ -124,7 +140,7 @@ sub connect
         $args{host} = $ENV{BACKUP_SERVER};
         $_Connection = $class->SUPER::connect(%args);
     }
-    $class->fields(qw(contact company street1 street2 city country zip_code tel_number fax_number tax_number url email brand aws_access_key aws_secret_key aws_account_num aws_cert_name aws_cert_text));
+    $class->fields(qw(contact company street1 street2 city country zip_code tel_number fax_number tax_number url email brand aws_access_key aws_secret_key aws_account_num aws_cert_name aws_cert_text max_addresses max_instances max_snapshots max_volumes));
 
     return $_Connection;
 }

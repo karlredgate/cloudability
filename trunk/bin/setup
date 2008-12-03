@@ -54,7 +54,7 @@ sub ask_for
 # Get setup info from the user's command line
 
 print "Please provide some info to set up your Cloudability system.\n";
-print "There are 20 questions and some are optional, i.e. with (opt).\n";
+print "There are 25 questions and some are optional, i.e. with (opt).\n";
 my $cust_contact = ask_for "Customer contact person, e.g. Bill Smith", REQUIRED;
 my $cust_name = ask_for "Customer company name, e.g. Acme Inc.", REQUIRED;
 my $cust_street1 = ask_for "Customer's street address (first line)";
@@ -71,6 +71,10 @@ my $cust_brand = ask_for "Customer's brand name";
 my $cust_aws_access_key = ask_for "Amazon AWS access key";
 my $cust_aws_secret_key = ask_for "Amazon AWS secret access key";
 my $cust_aws_account_num = ask_for "Amazon AWS account number, e.g. 1234-2345-3456";
+my $max_addresses = ask_for "Maximum number of IP addresses" || 0;
+my $max_instances = ask_for "Maximum number of instances" || 0;
+my $max_snapshots = ask_for "Maximum number of snapshots" || 0;
+my $max_volumes = ask_for "Maximum number of volumes" || 0;
 
 my $name = ask_for "System administrator's name", REQUIRED;
 my $email = ask_for "System administrator's email address", REQUIRED;
@@ -102,6 +106,10 @@ my $customer = Data::Customer->new(
     aws_access_key  => $cust_aws_access_key,
     aws_secret_key  => $cust_aws_secret_key,
     aws_account_num => $cust_aws_account_num,
+    max_addresses   => $max_addresses,
+    max_instances   => $max_instances,
+    max_snapshots   => $max_snapshots,
+    max_volumes     => $max_volumes,
 );
 $customer->insert();
 

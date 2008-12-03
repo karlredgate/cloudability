@@ -195,7 +195,7 @@ sub get_part_of_day
 {
     my ($class, $time_zone, $time) = @_;
     $time ||= time(); # for testing
-    my $date = $class->get_date($time, $time_zone);
+    my $date = $class->get_date($time, $time_zone); $date =~ s/-//g;
     my ($start_time, $end_time) = $class->get_time_range($date, $time_zone);
     return sprintf("%04.4f", ($time - $start_time) / DAY_SECS);
 }
