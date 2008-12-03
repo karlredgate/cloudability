@@ -86,10 +86,10 @@ Data::Volume->connect();
 # Delete any old data from the test database
 
 Data::Image->sql("delete from images");
-Data::Image->sql("delete from addresses");
-Data::Image->sql("delete from instances");
-Data::Image->sql("delete from snapshots");
-Data::Image->sql("delete from volumes");
+Data::Address->sql("delete from addresses");
+Data::Instance->sql("delete from instances");
+Data::Snapshot->sql("delete from snapshots");
+Data::Volume->sql("delete from volumes");
 
 # Run the synchronize command on mock data
 

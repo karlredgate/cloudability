@@ -38,6 +38,10 @@ create table if not exists customers
     aws_account_num VARCHAR(255),
     aws_cert_name   VARCHAR(255),
     aws_cert_text   MEDIUMTEXT,
+    max_addresses   SMALLINT DEFAULT 0,
+    max_instances   SMALLINT DEFAULT 0,
+    max_snapshots   SMALLINT DEFAULT 0,
+    max_volumes     SMALLINT DEFAULT 0,
 
     KEY             company (company)
 ) MAX_ROWS = 4294967296;

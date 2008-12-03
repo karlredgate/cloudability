@@ -28,6 +28,7 @@ $VERSION = "1.0";
 
 use strict;
 use Constants::AWS;
+use Clients::Quota;
 use Data::Address;
 use Data::Image;
 use Data::Instance;
@@ -97,10 +98,12 @@ sub command
     die "bad command \"$cmd\"" if $cmd =~ /;|&|\||`|>|</; # no ";&|`><" allowed
     $self->{log_file}->info("Command $cmd");
     $self->{account_id} = $account_id || 0;
+    my $quota = Clients::Quota->new($account_id);
 
     my $objects = [];
     if ($cmd =~ /^(allad|allocate-address)/)
     {
+        die "no address quota" unless $quota->address_quota();
         $objects = $self->parse_aws_command($cmd, 'publicIp');
         $self->check_for_error($objects);
         $self->sync_addresses($objects);
@@ -121,6 +124,10 @@ sub command
     }
     elsif ($cmd =~ /^(run|run-instances?|tin|terminate-instances?)/)
     {
+        if ($cmd =~ /^run/)
+        {
+            die "no instance quota" unless $quota->instance_quota() > 0;
+        }
         $self->{init_file} = $1 if $cmd =~ /-d\s+(\S+)/;
         $objects = $self->parse_aws_command($cmd, 'instanceId');
         $self->check_for_error($objects);
@@ -128,6 +135,7 @@ sub command
     }
     elsif ($cmd =~ /^(csnap|create-snapshot)/)
     {
+        die "no snapshot quota" unless $quota->snapshot_quota();
         $objects = $self->parse_aws_command($cmd, 'snapshotId');
         $self->check_for_error($objects);
         $self->sync_snapshots($objects);
@@ -141,6 +149,10 @@ sub command
     }
     elsif ($cmd =~ /^(attvol|attach-volume|cvol|create-volume|detvol|detach-volume)/)
     {
+        if ($cmd =~ /^c/) # create volume
+        {
+            die "no volume quota" unless $quota->volume_quota();
+        }
         $objects = $self->parse_aws_command($cmd, 'volumeId');
         $self->check_for_error($objects);
         $self->sync_volumes($objects);
@@ -468,7 +480,7 @@ sub sync_volumes
 
 =head1 DEPENDENCIES
 
-Constants::AWS, Data::Image, Data::Instance, Data::Snapshot, Data::Volume, Utils::Time, Utils::LogFile
+Constants::AWS, Clients::Quota, Data::Image, Data::Instance, Data::Snapshot, Data::Volume, Utils::Time, Utils::LogFile
 
 =head1 AUTHOR
 
