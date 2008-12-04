@@ -468,6 +468,24 @@ sub delete
     $self->{$id_field} = undef;
 }
 
+=item copy()
+
+Return a hashref copy of this object with no blessing (good for JSON encoding)
+
+=cut
+sub copy
+{
+    my ($self) = @_;
+    my $copy = {};
+
+    while (my ($field, $value) = each %{$self})
+    {
+        $copy->{$field} = $value;
+    }
+
+    return $copy;
+}
+
 }1;
 
 =back

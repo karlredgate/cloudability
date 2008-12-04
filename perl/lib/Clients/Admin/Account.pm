@@ -87,9 +87,9 @@ sub create
     $account = Data::Account->row($account->{id}); # get missing fields
     Data::Account->disconnect();
 
-    # Return the new account ID
+    # Return the new account ID and account, unblessed for JSON
 
-    return { status => 'ok', id => $account->{id}, account => $account };
+    return { status => 'ok', id => $account->{id}, account => $account->copy() };
 }
 
 =item select($values)
@@ -107,7 +107,7 @@ sub select
     my $account = $self->get_account($values);
     Data::Account->disconnect();
 
-    return { status => 'ok', account => $account };
+    return { status => 'ok', account => $account->copy() }; # unbless for JSON
 }
 
 =item update($values)
@@ -133,7 +133,7 @@ sub update
     $account->update();
     Data::Account->disconnect();
 
-    return { status => 'ok', account => $account };
+    return { status => 'ok', account => $account->copy() }; # unbless for JSON
 }
 
 =item delete($values)

@@ -195,8 +195,7 @@ sub describe_images
             $image->{id};
             $image = Data::Image->next())
     {
-        my $copy = {}; $self->copy_object($image, $copy); # unbless for JSON
-        push @images, $copy;
+        push @images, $image->copy(); # unbless for JSON
     }
     Data::Image->disconnect();
 
@@ -220,8 +219,7 @@ sub describe_addresses
             $address->{id};
             $address = Data::Address->next($query))
     {
-        my $copy = {}; $self->copy_object($address, $copy); # unbless for JSON
-        push @addresses, $copy;
+        push @addresses, $address->copy(); # unbless for JSON
     }
     Data::Address->disconnect();
 
@@ -245,8 +243,7 @@ sub describe_instances
             $instance->{id};
             $instance = Data::Instance->next($query))
     {
-        my $copy = {}; $self->copy_object($instance, $copy); # unbless for JSON
-        push @instances, $copy;
+        push @instances, $instance->copy(); # unbless for JSON
     }
     Data::Instance->disconnect();
 
@@ -270,8 +267,7 @@ sub describe_snapshots
             $snapshot->{id};
             $snapshot = Data::Snapshot->next($query))
     {
-        my $copy = {}; $self->copy_object($snapshot, $copy); # unbless for JSON
-        push @snapshots, $snapshot;
+        push @snapshots, $snapshot->copy(); # unbless for JSON
     }
     Data::Snapshot->disconnect();
 
@@ -295,8 +291,7 @@ sub describe_volumes
             $volume->{id};
             $volume = Data::Volume->next($query))
     {
-        my $copy = {}; $self->copy_object($volume, $copy); # unbless for JSON
-        push @volumes, $volume;
+        push @volumes, $volume->copy(); # unbless for JSON
     }
     Data::Volume->disconnect();
 

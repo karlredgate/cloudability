@@ -85,9 +85,9 @@ sub create
     $instance_config->insert();
     Data::InstanceConfig->disconnect();
 
-    # Return the new instance config ID
+    # Return the new instance config ID and instance config, unblessed for JSON
 
-    return { status => 'ok', id => $instance_config->{id}, instance_config => $instance_config };
+    return { status => 'ok', id => $instance_config->{id}, instance_config => $instance_config->copy() };
 }
 
 =item select($values)
@@ -116,7 +116,7 @@ sub select
             $instance_config->{id};
             $instance_config = Data::InstanceConfig->next($query))
     {
-        push @instance_configs, $instance_config;
+        push @instance_configs, $instance_config->copy(); # unbless for JSON
     }
     Data::InstanceConfig->disconnect();
 
@@ -155,7 +155,7 @@ sub update
     $instance_config->update();
     Data::InstanceConfig->disconnect();
 
-    return { status => 'ok', instance_config => $instance_config };
+    return { status => 'ok', instance_config => $instance_config->copy() }; # unbless for JSON
 }
 
 =item delete($values)
