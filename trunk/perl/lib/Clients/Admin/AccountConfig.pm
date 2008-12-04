@@ -78,9 +78,9 @@ sub create
     $account_config->insert();
     Data::AccountConfig->disconnect();
 
-    # Return the new account config ID
+    # Return the new account config ID and account config unblessed for JSON
 
-    return { status => 'ok', id => $account_config->{id}, account_config => $account_config };
+    return { status => 'ok', id => $account_config->{id}, account_config => $account_config->copy() };
 }
 
 =item select($values)
@@ -103,7 +103,7 @@ sub select
             $account_config->{id};
             $account_config = Data::AccountConfig->next($query))
     {
-        push @account_configs, $account_config;
+        push @account_configs, $account_config->copy(); # unbless for JSON
     }
     Data::AccountConfig->disconnect();
 
@@ -136,7 +136,7 @@ sub update
     $account_config->update();
     Data::AccountConfig->disconnect();
 
-    return { status => 'ok', account_config => $account_config };
+    return { status => 'ok', account_config => $account_config->copy() }; # unbless for JSON
 }
 
 =item delete($values)

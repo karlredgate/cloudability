@@ -204,3 +204,16 @@ create table if not exists account_tokens
     KEY             token_text (token_text)
 ) MAX_ROWS = 4294967296;
 
+create table if not exists sessions
+(
+    session_id      VARCHAR(40) PRIMARY KEY,
+    ip_address      VARCHAR(16) NOT NULL,
+    user_agent      VARCHAR(50) NOT NULL,
+    last_activity   INTEGER UNSIGNED NOT NULL,
+    user_data       TEXT NOT NULL,
+
+    KEY             ip_address (ip_address),
+    KEY             last_activity (last_activity)
+) MAX_ROWS = 4294967296;
+
+# end of c10y.sql

@@ -32,8 +32,7 @@ use JSON;
 {
     # Class static properties
 
-    use constant CAN_WRITE => 'can_write';
-    use constant CAN_READ => 'can_read';
+    # None
 
 =head2 Class Methods
 

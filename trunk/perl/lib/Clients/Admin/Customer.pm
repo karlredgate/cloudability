@@ -82,9 +82,9 @@ sub create
     $customer = Data::Customer->row($customer->{id}); # get missing fields
     Data::Customer->disconnect();
 
-    # Return the new customer ID
+    # Return the new customer ID and customer, unblessed for JSON
 
-    return { status => 'ok', id => $customer->{id}, customer => $customer };
+    return { status => 'ok', id => $customer->{id}, customer => $customer->copy() };
 }
 
 =item select($values)
@@ -102,7 +102,7 @@ sub select
     my $customer = $self->get_customer($values);
     Data::Customer->disconnect();
 
-    return { status => 'ok', customer => $customer };
+    return { status => 'ok', customer => $customer->copy() }; # unbless for JSON
 }
 
 =item update($values)
@@ -128,7 +128,7 @@ sub update
     $customer->update();
     Data::Customer->disconnect();
 
-    return { status => 'ok', customer => $customer };
+    return { status => 'ok', customer => $customer->copy() }; # unbless for JSON
 }
 
 =item delete($values)
