@@ -88,17 +88,18 @@ sub set_aws_command
 
 =over 4
 
-=item command($cmd, [$account_id])
+=item command($cmd, [$account_id], [$deployment_id])
 
 Run an AWS command and parse the results
 
 =cut
 sub command
 {
-    my ($self, $cmd, $account_id) = @_;
+    my ($self, $cmd, $account_id, $deployment_id) = @_;
     die "bad command \"$cmd\"" if $cmd =~ /;|&|\||`|>|</; # no ";&|`><" allowed
     $self->{log_file}->info("Command $cmd");
     $self->{account_id} = $account_id || 0;
+    $self->{deployment_id} = $deployment_id || 0;
     my $quota = Clients::Quota->new($account_id);
 
     my $objects = [];
@@ -217,6 +218,8 @@ sub parse_aws_command
     open (AWS, "$_AWS_COMMAND $cmd|");
     my @data = grep /^[^+]/, <AWS>;
     close AWS;
+    $self->{log_file}->info("Ran \"$_AWS_COMMAND $cmd\" and received:\n" .
+                            join('', @data));
 
     # Parse the first line as a header line always
 

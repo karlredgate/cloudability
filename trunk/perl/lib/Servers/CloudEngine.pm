@@ -134,7 +134,6 @@ sub run
                 # Update the job's running status
 
                 $job->{start_time} = $time;
-                $job->{source_server} = $ENV{HOSTNAME};
                 $job->{status} = 'R';
                 $job->update();
 

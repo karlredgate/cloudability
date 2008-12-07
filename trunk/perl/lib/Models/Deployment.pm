@@ -65,6 +65,7 @@ $VERSION = "1.0";
 
 use strict;
 use base 'Models::Object';
+use Constants::AWS;
 {
     # Class static properties
 
@@ -116,9 +117,38 @@ sub disconnect
 
 =over 4
 
-=item None
+=item to_aws_command()
+
+Transform a deployment definition into an AWS command (minus the "aws" bit)
 
 =cut
+sub to_aws_command
+{
+    my ($self) = @_;
+    die "no image ID in deployment $self->{id}" unless $self->{aws_image_id};
+
+    my $command = 'run ' . $self->{aws_image_id};
+    $command .= ' -k ' . $self->{aws_key_name} if $self->{aws_key_name};
+    $command .= ' -i ' . $self->{aws_inst_type} if $self->{aws_inst_type};
+    $command .= ' -z ' . $self->{aws_avail_zone} if $self->{aws_avail_zone};
+    $command .= ' -g ' . $self->{aws_sec_group} if $self->{aws_sec_group};
+    $command .= ' -d ' . $self->{id}; # to help us to "connect the dots"
+
+    return $command;
+}
+
+=item soft_delete()
+
+Update the snapshot to have a "deleted_at" time and a status of [D]eleted
+
+=cut
+sub soft_delete
+{
+    my ($self) = @_;
+    $self->{deleted_at} = Utils::Time->get_date_time();
+    $self->{status} = Constants::AWS::STATUS_DELETED;
+    $self->update();
+}
 
 }1;
 
@@ -126,7 +156,7 @@ sub disconnect
 
 =head1 DEPENDENCIES
 
-Models::Object
+Models::Object, Constants::AWS
 
 =head1 AUTHOR
 
