@@ -25,8 +25,8 @@ package Clients::Admin;
 $VERSION = "1.0";
 
 use strict;
-use Data::Customer;
-use Data::Account;
+use Models::Customer;
+use Models::Account;
 use XML::Simple;
 use JSON;
 {
@@ -51,15 +51,15 @@ sub factory
 
     # Get account details
 
-    Data::Account->connect();
-    my $account = Data::Account->select('id = ?', $account_id);
-    Data::Account->disconnect();
+    Models::Account->connect();
+    my $account = Models::Account->select('id = ?', $account_id);
+    Models::Account->disconnect();
 
     # Get customer details
 
-    Data::Customer->connect();
-    my $customer = Data::Customer->select('id = ?', $account->{customer_id});
-    Data::Customer->disconnect();
+    Models::Customer->connect();
+    my $customer = Models::Customer->select('id = ?', $account->{customer_id});
+    Models::Customer->disconnect();
 
     # Make a new Clients::Admin object
 
@@ -205,7 +205,7 @@ sub json_result
 
 =head1 DEPENDENCIES
 
-Data::Customer, Data::Account, XML::Simple, JSON
+Models::Customer, Models::Account, XML::Simple, JSON
 
 =head1 AUTHOR
 

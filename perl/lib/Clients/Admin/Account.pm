@@ -26,7 +26,7 @@ $VERSION = "1.0";
 
 use strict;
 use base 'Clients::Admin';
-use Data::Account;
+use Models::Account;
 use Utils::Time;
 {
     # Class static properties
@@ -69,13 +69,13 @@ sub create
 
     # Check that the account has not already been added
 
-    Data::Account->connect();
-    my $account = Data::Account->select('username = ? and customer_id = ?', $username, $self->{customer}{id});
+    Models::Account->connect();
+    my $account = Models::Account->select('username = ? and customer_id = ?', $username, $self->{customer}{id});
     die "account already exists with username $username" if $account->{id};
 
     # Create a new account from the values, but use defaults
 
-    $account = Data::Account->new(%{$values});
+    $account = Models::Account->new(%{$values});
     $account->{customer_id} = $self->{customer}{id};
     $account->{parent_id} = $self->{account}{id};
     $account->{start_date} ||= Utils::Time->get_date();
@@ -84,8 +84,8 @@ sub create
     # Insert the new account
 
     $account->insert();
-    $account = Data::Account->row($account->{id}); # get missing fields
-    Data::Account->disconnect();
+    $account = Models::Account->row($account->{id}); # get missing fields
+    Models::Account->disconnect();
 
     # Return the new account ID and account, unblessed for JSON
 
@@ -103,9 +103,9 @@ sub select
 
     # Get a matching account
 
-    Data::Account->connect();
+    Models::Account->connect();
     my $account = $self->get_account($values);
-    Data::Account->disconnect();
+    Models::Account->disconnect();
 
     return { status => 'ok', account => $account->copy() }; # unbless for JSON
 }
@@ -121,7 +121,7 @@ sub update
 
     # Get a matching account
 
-    Data::Account->connect();
+    Models::Account->connect();
     my $account = $self->get_account($values);
 
     # Update the account
@@ -131,7 +131,7 @@ sub update
         $account->{$key} = $values->{$key};
     }
     $account->update();
-    Data::Account->disconnect();
+    Models::Account->disconnect();
 
     return { status => 'ok', account => $account->copy() }; # unbless for JSON
 }
@@ -147,13 +147,13 @@ sub delete
 
     # Get a matching account
 
-    Data::Account->connect();
+    Models::Account->connect();
     my $account = $self->get_account($values);
 
     # Delete the object
 
     $account->delete();
-    Data::Account->disconnect();
+    Models::Account->disconnect();
 
     return { status => 'ok' };
 }
@@ -172,8 +172,8 @@ sub get_account
 
     # Get the matching account
 
-    my $account = $account_id ? Data::Account->row($account_id)
-                              : Data::Account->select('username = ? and customer_id = ?', $username, $self->{customer}{id});
+    my $account = $account_id ? Models::Account->row($account_id)
+                              : Models::Account->select('username = ? and customer_id = ?', $username, $self->{customer}{id});
     die "no matching account" unless $account->{id};
 
     # Check the customer ID, account ID and parent ID for permission
@@ -193,7 +193,7 @@ sub get_account
 
 =head1 DEPENDENCIES
 
-Data::Account, Utils::Time
+Models::Account, Utils::Time
 
 =head1 AUTHOR
 

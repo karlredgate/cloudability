@@ -25,10 +25,10 @@ package Clients::Label;
 $VERSION = "1.0";
 
 use strict;
-use Data::Address;
-use Data::Instance;
-use Data::Snapshot;
-use Data::Volume;
+use Models::Address;
+use Models::Instance;
+use Models::Snapshot;
+use Models::Volume;
 use XML::Simple;
 use JSON;
 {
@@ -97,16 +97,16 @@ sub set
     $entity = lc $entity; $id = lc $id;
     eval {
         my $obj;
-        $obj = $self->label('Data::Address', 'aws_public_ip', $id, $name, $desc)
+        $obj = $self->label('Models::Address', 'aws_public_ip', $id, $name, $desc)
                                                     if $entity eq 'address';
 
-        $obj = $self->label('Data::Instance', 'aws_instance_id', $id, $name, $desc)
+        $obj = $self->label('Models::Instance', 'aws_instance_id', $id, $name, $desc)
                                                     if $entity eq 'instance';
 
-        $obj = $self->label('Data::Snapshot', 'aws_snapshot_id', $id, $name, $desc)
+        $obj = $self->label('Models::Snapshot', 'aws_snapshot_id', $id, $name, $desc)
                                                     if $entity eq 'snapshot';
 
-        $obj = $self->label('Data::Volume', 'aws_volume_id', $id, $name, $desc)
+        $obj = $self->label('Models::Volume', 'aws_volume_id', $id, $name, $desc)
                                                     if $entity eq 'volume';
 
         $label->{update}{result} = { status => 'ok', $entity => $obj } if $obj;
@@ -225,7 +225,7 @@ sub json_result
 
 =head1 DEPENDENCIES
 
-Data::Address, Data::Instance, Data::Snapshot, Data::Volume, XML::Simple, JSON
+Models::Address, Models::Instance, Models::Snapshot, Models::Volume, XML::Simple, JSON
 
 =head1 AUTHOR
 

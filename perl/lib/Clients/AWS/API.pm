@@ -26,12 +26,12 @@ $VERSION = "1.0";
 
 use strict;
 use base 'Clients::AWS';
-use Data::CloudJob;
-use Data::Customer;
-use Data::Image;
-use Data::Instance;
-use Data::Volume;
-use Data::Snapshot;
+use Models::CloudJob;
+use Models::Customer;
+use Models::Image;
+use Models::Instance;
+use Models::Volume;
+use Models::Snapshot;
 use XML::Simple;
 use JSON;
 {
@@ -128,7 +128,7 @@ sub command
     {
         # Submit a cloud job for processing ASAP
 
-        my $job = Data::CloudJob->submit(command => "$ENV{CLOUDABILITY_HOME}/perl/aws.pl $account->{id} $command");
+        my $job = Models::CloudJob->submit(command => "$ENV{CLOUDABILITY_HOME}/perl/aws.pl $account->{id} $command");
         $self->{object_type} = 'job';
         $objects = [ $job ];
     }
@@ -190,14 +190,14 @@ sub describe_images
     $self->{object_type} = 'image';
 
     my @images;
-    Data::Image->connect();
-    for (my $image = Data::Image->select();
+    Models::Image->connect();
+    for (my $image = Models::Image->select();
             $image->{id};
-            $image = Data::Image->next())
+            $image = Models::Image->next())
     {
         push @images, $image->copy(); # unbless for JSON
     }
-    Data::Image->disconnect();
+    Models::Image->disconnect();
 
     return \@images;
 }
@@ -213,15 +213,15 @@ sub describe_addresses
     $self->{object_type} = 'address';
 
     my @addresses;
-    Data::Address->connect();
+    Models::Address->connect();
     my $query = 'account_id = ?';
-    for (my $address = Data::Address->select($query, $account->{id});
+    for (my $address = Models::Address->select($query, $account->{id});
             $address->{id};
-            $address = Data::Address->next($query))
+            $address = Models::Address->next($query))
     {
         push @addresses, $address->copy(); # unbless for JSON
     }
-    Data::Address->disconnect();
+    Models::Address->disconnect();
 
     return \@addresses;
 }
@@ -237,15 +237,15 @@ sub describe_instances
     $self->{object_type} = 'instance';
 
     my @instances;
-    Data::Instance->connect();
+    Models::Instance->connect();
     my $query = 'account_id = ?';
-    for (my $instance = Data::Instance->select($query, $account->{id});
+    for (my $instance = Models::Instance->select($query, $account->{id});
             $instance->{id};
-            $instance = Data::Instance->next($query))
+            $instance = Models::Instance->next($query))
     {
         push @instances, $instance->copy(); # unbless for JSON
     }
-    Data::Instance->disconnect();
+    Models::Instance->disconnect();
 
     return \@instances;
 }
@@ -261,15 +261,15 @@ sub describe_snapshots
     $self->{object_type} = 'snapshot';
 
     my @snapshots;
-    Data::Snapshot->connect();
+    Models::Snapshot->connect();
     my $query = 'account_id = ?';
-    for (my $snapshot = Data::Snapshot->select($query, $account->{id});
+    for (my $snapshot = Models::Snapshot->select($query, $account->{id});
             $snapshot->{id};
-            $snapshot = Data::Snapshot->next($query))
+            $snapshot = Models::Snapshot->next($query))
     {
         push @snapshots, $snapshot->copy(); # unbless for JSON
     }
-    Data::Snapshot->disconnect();
+    Models::Snapshot->disconnect();
 
     return \@snapshots;
 }
@@ -285,15 +285,15 @@ sub describe_volumes
     $self->{object_type} = 'volume';
 
     my @volumes;
-    Data::Volume->connect();
+    Models::Volume->connect();
     my $query = 'account_id = ?';
-    for (my $volume = Data::Volume->select($query, $account->{id});
+    for (my $volume = Models::Volume->select($query, $account->{id});
             $volume->{id};
-            $volume = Data::Volume->next($query))
+            $volume = Models::Volume->next($query))
     {
         push @volumes, $volume->copy(); # unbless for JSON
     }
-    Data::Volume->disconnect();
+    Models::Volume->disconnect();
 
     return \@volumes;
 }
@@ -304,7 +304,7 @@ sub describe_volumes
 
 =head1 DEPENDENCIES
 
-Clients::AWS, Data::CloudJob, Data::Customer, Data::Image, Data::Instance, Data::Snapshot, Data::Volume, XML::Simple, JSON
+Clients::AWS, Models::CloudJob, Models::Customer, Models::Image, Models::Instance, Models::Snapshot, Models::Volume, XML::Simple, JSON
 
 =head1 AUTHOR
 

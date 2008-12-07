@@ -18,14 +18,14 @@ my %object = (
 );
 
 use Test::More tests => 11;
-use Data::Image;
-Data::Image->connect();
+use Models::Image;
+Models::Image->connect();
 
 # Store and retrieve an object to check all fields
 
-my $inserted = Data::Image->new( %object );
+my $inserted = Models::Image->new( %object );
 $inserted->insert();
-my $retrieved = Data::Image->row($inserted->{id});
+my $retrieved = Models::Image->row($inserted->{id});
 $inserted->delete();
     
 while (my ($field, $value) = each %object)

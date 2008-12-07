@@ -25,14 +25,14 @@ my %object = (
 );
 
 use Test::More tests => 18;
-use Data::Customer;
-Data::Customer->connect();
+use Models::Customer;
+Models::Customer->connect();
 
 # Store and retrieve an object to check all fields
 
-my $inserted = Data::Customer->new( %object );
+my $inserted = Models::Customer->new( %object );
 $inserted->insert();
-my $retrieved = Data::Customer->row($inserted->{id});
+my $retrieved = Models::Customer->row($inserted->{id});
 $inserted->delete();
     
 while (my ($field, $value) = each %object)

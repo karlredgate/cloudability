@@ -20,14 +20,14 @@ my %object = (
 );
 
 use Test::More tests => 13;
-use Data::Volume;
-Data::Volume->connect();
+use Models::Volume;
+Models::Volume->connect();
 
 # Store and retrieve an object to check all fields
 
-my $inserted = Data::Volume->new( %object );
+my $inserted = Models::Volume->new( %object );
 $inserted->insert();
-my $retrieved = Data::Volume->row($inserted->{id});
+my $retrieved = Models::Volume->row($inserted->{id});
 $inserted->delete();
     
 while (my ($field, $value) = each %object)

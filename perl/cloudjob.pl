@@ -29,7 +29,7 @@ BEGIN {
 
 use lib "$ENV{CLOUDABILITY_HOME}/perl/lib";
 use Constants::AWS;
-use Data::CloudJob;
+use Models::CloudJob;
 
 my $cloud_job_id = shift || 0;
 my $command = join ' ', @ARGV;
@@ -66,19 +66,19 @@ chomp $result;
 
 # Update the cloud job's details
 
-Data::CloudJob->connect();
-my $cloud_job = Data::CloudJob->row($cloud_job_id);
+Models::CloudJob->connect();
+my $cloud_job = Models::CloudJob->row($cloud_job_id);
 $cloud_job->{finish_time} = time();
 $cloud_job->{result} = $result;
 $cloud_job->{status} = $status;
 $cloud_job->update();
-Data::CloudJob->disconnect();
+Models::CloudJob->disconnect();
 
 __END__
 
 =head1 DEPENDENCIES
 
-Data::CloudJob
+Models::CloudJob
 
 =head1 AUTHOR
 

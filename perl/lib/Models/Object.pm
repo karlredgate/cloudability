@@ -2,12 +2,12 @@
 
 =head1 NAME
 
-Data::Object - Store Perl objects in a MySql (or Oracle) database
+Models::Object - Store Perl objects in a MySql (or Oracle) database
 
 =head1 VERSION
 
-This document refers to version 1.2 of Data::Object, released Nov 07, 2008.
-Download Data::Object.pm from http://www.legendum.com/perl/Data::Object.pm
+This document refers to version 1.2 of Models::Object, released Nov 07, 2008.
+Download Models::Object.pm from http://www.legendum.com/perl/Models::Object.pm
 
 =head1 SYNOPSIS
 
@@ -25,8 +25,8 @@ First create a table Foo in a MySql database Bar:
 Then create a Perl program to access table Foo in database Bar as objects:
 
     package Foo;
-    @ISA = qw(Data::Object);
-    use Data::Object;
+    @ISA = qw(Models::Object);
+    use Models::Object;
 
     package main;
     Foo->connect(database=>'Bar', user=>'fred', password=>'bloggs');
@@ -42,28 +42,28 @@ Then create a Perl program to access table Foo in database Bar as objects:
 
 =head1 DESCRIPTION
 
-Data::Object stores objects in a database. It should be inherited by a class
+Models::Object stores objects in a database. It should be inherited by a class
 wishing to persist its objects in the database. The inheriting class should
 correspond to a table of the same name (case-sensitive) in the database. This
 table must have an auto_increment column as its primary key.
 
-Data::Object provides database connectivity via connect() and disconnect(),
+Models::Object provides database connectivity via connect() and disconnect(),
 object creation via methods new(), select() and next(), and object/database
 synchronisation via methods insert(), update() and delete().
 
-Data::Object does not check whether objects were modified in the database while
+Models::Object doesn't check whether objects were modified in the database while
 they were being modified in your Perl program. Nor does it support any locking
 mechanisms. Basically it's designed to be fast, simple, easy and predictable.
 
-To use Data::Object with an Oracle database, set the ORACLE_HOME database
+To use Models::Object with an Oracle database, set the ORACLE_HOME database
 environment variable. When using Oracle on Sun Solaris, you should also set the
 LD_PRELOAD to "/lib/libthread.so.1" to enable thread support. When you connect,
 you should add "driver=>'Oracle'" to the argument list. When setting and getting
-object field values, use the Data::Object AUTOLOAD method because Oracle fields
+object field values, use the Models::Object AUTOLOAD method because Oracle fields
 have uppercase names. For example, to set blah to be 2, use "$obj->blah(2)".
 
 =cut
-package Data::Object;
+package Models::Object;
 $VERSION = "1.2";
 
 use strict;

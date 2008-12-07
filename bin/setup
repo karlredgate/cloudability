@@ -28,8 +28,8 @@ BEGIN {
 
 use lib "$ENV{CLOUDABILITY_HOME}/perl/lib";
 use Term::ReadLine;
-use Data::Customer;
-use Data::Account;
+use Models::Customer;
+use Models::Account;
 use Utils::Time;
 
 use constant REQUIRED => 1;
@@ -84,12 +84,12 @@ my $password = ask_for "System administrator's password", REQUIRED;
 
 # Connect to the customer and account data
 
-Data::Customer->connect();
-Data::Account->connect();
+Models::Customer->connect();
+Models::Account->connect();
 
 # Make a new customer
 
-my $customer = Data::Customer->new(
+my $customer = Models::Customer->new(
     contact         => $cust_contact,
     company         => $cust_name,
     street1         => $cust_street1,
@@ -113,7 +113,7 @@ my $customer = Data::Customer->new(
 );
 $customer->insert();
 
-my $account = Data::Account->new(
+my $account = Models::Account->new(
     customer_id     => $customer->{id},
     parent_id       => 0,
     status          => 'A',
@@ -130,14 +130,14 @@ print "Thank you. Setup complete.\n";
 
 # Disconnect from the database
 
-Data::Customer->disconnect();
-Data::Account->disconnect();
+Models::Customer->disconnect();
+Models::Account->disconnect();
 
 __END__
 
 =head1 DEPENDENCIES
 
-Term::ReadLine, Data::Customer, Data::Account, Utils::Time
+Term::ReadLine, Models::Customer, Models::Account, Utils::Time
 
 =head1 AUTHOR
 

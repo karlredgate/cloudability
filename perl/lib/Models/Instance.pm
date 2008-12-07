@@ -2,16 +2,16 @@
 
 =head1 NAME
 
-Data::Instance - Manages customer account instances
+Models::Instance - Manages customer account instances
 
 =head1 VERSION
 
-This document refers to version 1.0 of Data::Instance, released Nov 07, 2008
+This document refers to version 1.0 of Models::Instance, released Nov 07, 2008
 
 =head1 DESCRIPTION
 
-Data::Instance manages the details for all customer account instances.
-Be sure to call the class static method connect() before using Data::Instance
+Models::Instance manages the details for all customer account instances.
+Be sure to call the class static method connect() before using Models::Instance
 objects and disconnect() once you've finished.
 
 =head2 Properties
@@ -93,11 +93,11 @@ The status of the image [P]ending, [R]unning, [S]hutting down or [T]erminated
 =back
 
 =cut
-package Data::Instance;
+package Models::Instance;
 $VERSION = "1.0";
 
 use strict;
-use base 'Data::Object';
+use base 'Models::Object';
 use Constants::AWS;
 {
     # Class static properties
@@ -180,8 +180,8 @@ sub deploy_to_host
     die "no AWS public DNS host name" unless $self->{aws_public_dns};
 
     $self->know_host(); # so we don't get prompted for SSH/SCP configmations
-    Data::Deployment->connect();
-    my $deployment = Data::Deployment->row($self->{deployment_id});
+    Models::Deployment->connect();
+    my $deployment = Models::Deployment->row($self->{deployment_id});
     my $deploy_file = $deployment->{deploy_file} || Constants::AWS::DEPLOY_FILE;
     open (DEPLOY_FILE, "$ENV{DEPLOY_DIR}/$deploy_file") or die "no deploy file";
     while (my $command = <DEPLOY_FILE>)
@@ -221,7 +221,7 @@ sub know_host
 
 =head1 DEPENDENCIES
 
-Data::Object
+Models::Object
 
 =head1 AUTHOR
 

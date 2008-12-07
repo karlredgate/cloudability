@@ -2,16 +2,16 @@
 
 =head1 NAME
 
-Data::AccountConfig - Manages the configuration options of customer accounts
+Models::AccountConfig - Manages the configuration options of customer accounts
 
 =head1 VERSION
 
-This document refers to version 1.0 of Data::AccountConfig, released Nov 07, 2008
+This document refers to version 1.0 of Models::AccountConfig, released Nov 07, 2008
 
 =head1 DESCRIPTION
 
-Data::AccountConfig manages the configuration options of all customer accounts.
-Be sure to call the class static method connect() before using Data::AccountConfig objects and disconnect() once you've finished.
+Models::AccountConfig manages the configuration options of all customer accounts.
+Be sure to call the class static method connect() before using Models::AccountConfig objects and disconnect() once you've finished.
 
 =head2 Properties
 
@@ -32,11 +32,11 @@ The configuration value
 =back
 
 =cut
-package Data::AccountConfig;
+package Models::AccountConfig;
 $VERSION = "1.0";
 
 use strict;
-use base 'Data::Object';
+use base 'Models::Object';
 {
     # Class static properties
 
@@ -154,7 +154,7 @@ sub set
 
 =head1 DEPENDENCIES
 
-Data::Object
+Models::Object
 
 =head1 AUTHOR
 

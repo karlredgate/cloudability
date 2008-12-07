@@ -26,7 +26,7 @@ $VERSION = "1.0";
 
 use strict;
 use base 'Clients::Admin';
-use Data::Deployment;
+use Models::Deployment;
 {
     # Class static properties
 
@@ -68,14 +68,14 @@ sub create
 
     # Create a new deployment from the values, unless it already exists
 
-    Data::Deployment->connect();
-    my $deployment = Data::Deployment->select('account_id = ? and id = ?', $account_id, $deployment_id);
+    Models::Deployment->connect();
+    my $deployment = Models::Deployment->select('account_id = ? and id = ?', $account_id, $deployment_id);
     die "deployment already exists" if $deployment->{id};
 
     $values->{account_id} = $account_id;
-    $deployment = new Data::Deployment(%{$values});
+    $deployment = new Models::Deployment(%{$values});
     $deployment->insert();
-    Data::Deployment->disconnect();
+    Models::Deployment->disconnect();
 
     # Return the new deployment ID and deployment, unblessed for JSON
 
@@ -94,16 +94,16 @@ sub select
 
     # Get the deployment
 
-    Data::Deployment->connect();
+    Models::Deployment->connect();
     my @deployments = ();
     my $query = 'account_id = ?';
-    for (my $deployment = Data::Deployment->select($query, $account_id);
+    for (my $deployment = Models::Deployment->select($query, $account_id);
             $deployment->{id};
-            $deployment = Data::Deployment->next($query))
+            $deployment = Models::Deployment->next($query))
     {
         push @deployments, $deployment->copy(); # unbless for JSON
     }
-    Data::Deployment->disconnect();
+    Models::Deployment->disconnect();
 
     die "no matching deployments" unless @deployments;
 
@@ -123,8 +123,8 @@ sub update
 
     # Get the deployment to update
 
-    Data::Deployment->connect();
-    my $deployment = Data::Deployment->select('account_id = ? and id = ?', $account_id, $deployment_id);
+    Models::Deployment->connect();
+    my $deployment = Models::Deployment->select('account_id = ? and id = ?', $account_id, $deployment_id);
     die "no matching deployment" unless $deployment->{id};
 
     # Update the deployment
@@ -135,7 +135,7 @@ sub update
         $deployment->{$key} = $values->{$key};
     }
     $deployment->update();
-    Data::Deployment->disconnect();
+    Models::Deployment->disconnect();
 
     return { status => 'ok', deployment => $deployment->copy() }; # unbless for JSON
 }
@@ -153,14 +153,14 @@ sub delete
 
     # Get the deployment to delete
 
-    Data::Deployment->connect();
-    my $deployment = Data::Deployment->select('account_id = ? and id = ?', $account_id, $deployment_id);
+    Models::Deployment->connect();
+    my $deployment = Models::Deployment->select('account_id = ? and id = ?', $account_id, $deployment_id);
     die "no matching deployment " unless $deployment->{id};
 
     # Delete the object
 
     $deployment->delete();
-    Data::Deployment->disconnect();
+    Models::Deployment->disconnect();
 
     return { status => 'ok' };
 }
@@ -171,7 +171,7 @@ sub delete
 
 =head1 DEPENDENCIES
 
-Data::Deployment
+Models::Deployment
 
 =head1 AUTHOR
 
