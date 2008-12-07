@@ -9,8 +9,8 @@ BEGIN {
 
 use lib "$ENV{CLOUDABILITY_HOME}/perl/lib";
 use CGI qw/:cgi -debug/;
-use Data::Account;
-use Data::AccountToken;
+use Models::Account;
+use Models::AccountToken;
 
 # Return an error message to the user
 
@@ -20,6 +20,7 @@ sub error
     print "Content-type: text/plain\n\nERROR: $message\n";
     exit;
 }
+
 # Get the query parameters
 
 my $cgi = new CGI;
@@ -29,6 +30,13 @@ my $username = $params{username} or error "no 'username' query parameter";
 my $password = $params{password} or error "no 'password' query parameter";
 my $request = $params{request} || '';
 my $callback = $params{callback} || '';
+
+# Which database are we using?
+
+if (my $database = $params{database})
+{
+    $ENV{DB_DATABASE} .= "_$database";
+}
 
 # Store the remote host address
 
@@ -40,25 +48,25 @@ eval {
 
 # Connect to the database
 
-Data::Account->connect();
-Data::AccountToken->connect();
+Models::Account->connect();
+Models::AccountToken->connect();
 
 # Get the account details
 
-my $account = Data::Account->select("username = ? and password = ?", $username, $password);
+my $account = Models::Account->select("username = ? and password = ?", $username, $password);
 my $account_id = $account->{id} or error "no user found with username '$username' and password '$password'";
 
 # Get the token details, and make a new token if necessary
 
-my $token = Data::AccountToken->select("account_id = ?", $account_id);
+my $token = Models::AccountToken->select("account_id = ?", $account_id);
 $token->create($account_id) unless $token->{api_token_id};
 my $output = $token->generate(format  => $format,
                               request => $request);
 
 # Disconnect from the database
 
-Data::Account->disconnect();
-Data::AccountToken->disconnect();
+Models::Account->disconnect();
+Models::AccountToken->disconnect();
 
 # Finally, write the output
 
@@ -73,7 +81,7 @@ __END__
 
 =head1 DEPENDENCIES
 
-Data::Account, Data::AccountToken
+Models::Account, Models::AccountToken
 
 =head1 AUTHOR
 

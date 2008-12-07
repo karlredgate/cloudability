@@ -9,7 +9,7 @@ BEGIN {
 
 use lib "$ENV{CLOUDABILITY_HOME}/perl/lib";
 use CGI qw/:cgi -debug/;
-use Data::AccountToken;
+use Models::AccountToken;
 use Clients::Admin;
 
 # Return an error message to the user
@@ -49,11 +49,11 @@ eval {
 
 # Connect to the database
 
-Data::AccountToken->connect();
+Models::AccountToken->connect();
 
 # Select the API token
 
-my $token = Data::AccountToken->select('token_text = ?', $token_text);
+my $token = Models::AccountToken->select('token_text = ?', $token_text);
 my $account_id = $token->{account_id} or error "no token found with ID '$token_text'";
 
 # Check the token call
@@ -71,7 +71,7 @@ my $output = $admin->perform(   action  => $action,
 
 # Disconnect from the database
 
-Data::AccountToken->disconnect();
+Models::AccountToken->disconnect();
 
 # Finally, write the result
 
@@ -86,7 +86,7 @@ __END__
 
 =head1 DEPENDENCIES
 
-Data::AccountToken, Clients::Admin
+Models::AccountToken, Clients::Admin
 
 =head1 AUTHOR
 
