@@ -74,7 +74,7 @@ sub create
     my $account_config = Models::AccountConfig->select('account_id = ? and field = ?', $account_id, $field);
     die "account config already exists" if $account_config->{id};
     $values->{account_id} = $account_id;
-    $account_config = new Models::AccountConfig(%{$values});
+    $account_config = Models::AccountConfig->new(%{$values});
     $account_config->insert();
     Models::AccountConfig->disconnect();
 

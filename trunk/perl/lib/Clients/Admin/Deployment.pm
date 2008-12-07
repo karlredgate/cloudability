@@ -26,6 +26,7 @@ $VERSION = "1.0";
 
 use strict;
 use base 'Clients::Admin';
+use Constants::AWS;
 use Models::Deployment;
 {
     # Class static properties
@@ -66,14 +67,11 @@ sub create
     my ($self, $values) = @_;
     my $account_id = $self->{account}{id};
 
-    # Create a new deployment from the values, unless it already exists
+    # Create a new deployment from the values
 
     Models::Deployment->connect();
-    my $deployment = Models::Deployment->select('account_id = ? and id = ?', $account_id, $deployment_id);
-    die "deployment already exists" if $deployment->{id};
-
     $values->{account_id} = $account_id;
-    $deployment = new Models::Deployment(%{$values});
+    my $deployment = Models::Deployment->new(%{$values});
     $deployment->insert();
     Models::Deployment->disconnect();
 
@@ -91,13 +89,14 @@ sub select
 {
     my ($self, $values) = @_;
     my $account_id = $self->{account}{id};
+    my $status = $values->{status} || Constants::AWS::STATUS_ACTIVE;
 
     # Get the deployment
 
     Models::Deployment->connect();
     my @deployments = ();
-    my $query = 'account_id = ?';
-    for (my $deployment = Models::Deployment->select($query, $account_id);
+    my $query = 'account_id = ? and status = ?';
+    for (my $deployment = Models::Deployment->select($query, $account_id, $status);
             $deployment->{id};
             $deployment = Models::Deployment->next($query))
     {
@@ -159,7 +158,7 @@ sub delete
 
     # Delete the object
 
-    $deployment->delete();
+    $deployment->soft_delete();
     Models::Deployment->disconnect();
 
     return { status => 'ok' };
@@ -171,7 +170,7 @@ sub delete
 
 =head1 DEPENDENCIES
 
-Models::Deployment
+Constants::AWS, Models::Deployment
 
 =head1 AUTHOR
 

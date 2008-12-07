@@ -7,6 +7,7 @@ my $aws_instance_id = 'i-4064d929';
 
 my %object = (
     account_id      => 1,
+    cluster_id      => 0,
     deployment_id   => 1,
     aws_instance_id => $aws_instance_id,
     aws_image_id    => 'aws_image_id',
@@ -26,7 +27,7 @@ my %object = (
     status          => 'R',
 );
 
-use Test::More tests => 18;
+use Test::More tests => 19;
 use Models::Instance;
 Models::Instance->connect();
 

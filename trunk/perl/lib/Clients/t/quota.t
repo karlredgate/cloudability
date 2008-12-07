@@ -102,6 +102,7 @@ is $quota->address_quota(), -1, "negative address quota";
 my $instances = [
     {
         account_id      => $account2->{id},
+        #cluster_id      => 0, # can be null if the instance isn't clustered
         deployment_id   => 1,
         aws_instance_id => 'i-f63a889f',
         aws_image_id    => 'ami-af7793c6',
