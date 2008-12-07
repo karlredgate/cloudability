@@ -112,6 +112,11 @@ create table if not exists deployments
 (
     id              INTEGER UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     account_id      INTEGER UNSIGNED NOT NULL,
+    aws_image_id    VARCHAR(255) NOT NULL,
+    aws_inst_type   VARCHAR(255) NOT NULL,
+    aws_avail_zone  VARCHAR(255) NOT NULL,
+    aws_sec_group   VARCHAR(255) NOT NULL,
+    aws_key_name    VARCHAR(255) NOT NULL,
     deploy_file     VARCHAR(255) NOT NULL,
     is_elasic       ENUM('Y','N'),
     name            VARCHAR(255),

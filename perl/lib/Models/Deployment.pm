@@ -21,6 +21,26 @@ Be sure to call the class static method connect() before using Models::Deploymen
 
 The account holder who created the deployment
 
+=item aws_image_id
+
+The AWS image ID
+
+=item aws_inst_type
+
+The AWS instance type (e.g. "c1.medium")
+
+=item aws_avail_zone
+
+The AWS availability zone (placement)
+
+=item aws_sec_group
+
+The AWS security group (default is "default")
+
+=item aws_key_name
+
+The AWS key name for root access
+
 =item deploy_file
 
 The deployment script file to use when deploying
@@ -71,7 +91,7 @@ sub connect
         $args{host} = $ENV{BACKUP_SERVER};
         $_Connection = $class->SUPER::connect(%args);
     }
-    $class->fields(qw(account_id deploy_file is_elasic name description status));
+    $class->fields(qw(account_id aws_image_id aws_inst_type aws_avail_zone aws_sec_group aws_key_name deploy_file is_elasic name description status));
 
     return $_Connection;
 }

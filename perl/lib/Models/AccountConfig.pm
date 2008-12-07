@@ -93,7 +93,7 @@ sub get
     die "no account" unless $account_id;
 
     my $sql = 'account_id = ?';
-    my $config = [];
+    my $config = {};
     for (my $account_config = $class->select($sql, $account_id);
         $account_config->{id};
         $account_config = $class->next($sql))

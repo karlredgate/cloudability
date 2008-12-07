@@ -4,15 +4,20 @@ use strict;
 use warnings;
 
 my %object = (
-    account_id  => 1,
-    deploy_file => 'example.sh',
-    is_elasic   => 'N',
-    name        => 'name',
-    description => 'description',
-    status      => 'A',
+    account_id      => 1,
+    aws_image_id    => 'aws_image_id',
+    aws_inst_type   => 'aws_inst_type',
+    aws_avail_zone  => 'aws_avail_zone',
+    aws_sec_group   => 'aws_sec_group',
+    aws_key_name    => 'aws_key_name',
+    deploy_file     => 'example.sh',
+    is_elasic       => 'N',
+    name            => 'name',
+    description     => 'description',
+    status          => 'A',
 );
 
-use Test::More tests => 6;
+use Test::More tests => 11;
 use Models::Deployment;
 Models::Deployment->connect();
 
