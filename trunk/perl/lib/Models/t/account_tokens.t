@@ -14,14 +14,14 @@ my %object = (
 );
 
 use Test::More tests => 7;
-use Data::AccountToken;
-Data::AccountToken->connect();
+use Models::AccountToken;
+Models::AccountToken->connect();
 
 # Store and retrieve an object to check all fields
 
-my $inserted = Data::AccountToken->new( %object );
+my $inserted = Models::AccountToken->new( %object );
 $inserted->insert();
-my $retrieved = Data::AccountToken->row($inserted->{id});
+my $retrieved = Models::AccountToken->row($inserted->{id});
 $inserted->delete();
     
 while (my ($field, $value) = each %object)

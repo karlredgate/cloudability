@@ -5,30 +5,30 @@ use warnings;
 
 use Test::More tests => 4;
 use Clients::Quota;
-use Data::Customer;
-use Data::Account;
-use Data::Address;
-use Data::Instance;
-use Data::Snapshot;
-use Data::Volume;
+use Models::Customer;
+use Models::Account;
+use Models::Address;
+use Models::Instance;
+use Models::Snapshot;
+use Models::Volume;
 
 # Connect to the database
 
-Data::Customer->connect();
-Data::Account->connect();
-Data::Address->connect();
-Data::Instance->connect();
-Data::Snapshot->connect();
-Data::Volume->connect();
+Models::Customer->connect();
+Models::Account->connect();
+Models::Address->connect();
+Models::Instance->connect();
+Models::Snapshot->connect();
+Models::Volume->connect();
 
 # Delete any old data from the test database
 
-Data::Customer->sql("delete from customers");
-Data::Account->sql("delete from accounts");
-Data::Address->sql("delete from addresses");
-Data::Instance->sql("delete from instances");
-Data::Snapshot->sql("delete from snapshots");
-Data::Volume->sql("delete from volumes");
+Models::Customer->sql("delete from customers");
+Models::Account->sql("delete from accounts");
+Models::Address->sql("delete from addresses");
+Models::Instance->sql("delete from instances");
+Models::Snapshot->sql("delete from snapshots");
+Models::Volume->sql("delete from volumes");
 
 # Insert a new customer and two accounts
 
@@ -46,7 +46,7 @@ my $customer = {
     max_snapshots   => 1,
     max_volumes     => 3,
 };
-$customer = Data::Customer->new(%{$customer});
+$customer = Models::Customer->new(%{$customer});
 $customer->insert();
 
 my $account = {
@@ -60,9 +60,9 @@ my $account = {
     username        => 'username',
     password        => 'password',
 };
-my $account1 = Data::Account->new(%{$account});
+my $account1 = Models::Account->new(%{$account});
 $account1->insert();
-my $account2 = Data::Account->new(%{$account});
+my $account2 = Models::Account->new(%{$account});
 $account2->insert();
 
 # Now we can make a quota object for an account
@@ -90,7 +90,7 @@ my $addresses = [
 ];
 foreach my $address (@{$addresses})
 {
-    Data::Address->new(%{$address})->insert();
+    Models::Address->new(%{$address})->insert();
 }
 
 # The customer has a quota for 1 address, but has 2 active addresses (quota -1)
@@ -119,7 +119,7 @@ my $instances = [
 ];
 foreach my $instance (@{$instances})
 {
-    Data::Instance->new(%{$instance})->insert();
+    Models::Instance->new(%{$instance})->insert();
 }
 
 # The customer has a quota for 1 instance, and has 1 active instance (quota 0)
@@ -150,7 +150,7 @@ my $snapshots = [
 ];
 foreach my $snapshot (@{$snapshots})
 {
-    Data::Snapshot->new(%{$snapshot})->insert();
+    Models::Snapshot->new(%{$snapshot})->insert();
 }
 
 # The customer has a quota for 1 snapshot, and has 1 active snapshot (quota 0)
@@ -181,7 +181,7 @@ my $volumes = [
 ];
 foreach my $volume (@{$volumes})
 {
-    Data::Volume->new(%{$volume})->insert();
+    Models::Volume->new(%{$volume})->insert();
 }
 
 # The customer has a quota for 3 volume, and has 2 active volumes (quota 1)

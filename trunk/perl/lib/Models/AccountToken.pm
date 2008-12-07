@@ -2,16 +2,16 @@
 
 =head1 NAME
 
-Data::AccountToken - Manage the properties of all customer account tokens
+Models::AccountToken - Manage the properties of all customer account tokens
 
 =head1 VERSION
 
-This document refers to version 1.0 of Data::AccountToken, released Nov 07, 2008
+This document refers to version 1.0 of Models::AccountToken, released Nov 07, 2008
 
 =head1 DESCRIPTION
 
-Data::AccountToken manages the properties of all customer account tokens.
-Be sure to call the class static method connect() before using Data::AccountToken 
+Models::AccountToken manages the properties of all customer account tokens.
+Be sure to call the class static method connect() before using Models::AccountToken 
 objects and disconnect() once you've finished.
 
 =head2 Properties
@@ -49,11 +49,11 @@ The account token status ([A]ctive or [S]uspended)
 =back
 
 =cut
-package Data::AccountToken;
+package Models::AccountToken;
 $VERSION = "1.0";
 
 use strict;
-use base 'Data::Object';
+use base 'Models::Object';
 use Utils::Time;
 use Digest::MD5 qw(md5_hex);
 use XML::Simple;
@@ -219,7 +219,7 @@ sub generate
 
 =head1 DEPENDENCIES
 
-Data::Object, Utils::Time, Digest::MD5, XML::Simple, JSON
+Models::Object, Utils::Time, Digest::MD5, XML::Simple, JSON
 
 =head1 AUTHOR
 

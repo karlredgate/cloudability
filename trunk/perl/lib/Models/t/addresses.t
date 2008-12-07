@@ -15,14 +15,14 @@ my %object = (
 );
 
 use Test::More tests => 8;
-use Data::Address;
-Data::Address->connect();
+use Models::Address;
+Models::Address->connect();
 
 # Store and retrieve an object to check all fields
 
-my $inserted = Data::Address->new( %object );
+my $inserted = Models::Address->new( %object );
 $inserted->insert();
-my $retrieved = Data::Address->row($inserted->{id});
+my $retrieved = Models::Address->row($inserted->{id});
 $inserted->delete();
     
 while (my ($field, $value) = each %object)

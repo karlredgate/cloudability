@@ -2,16 +2,16 @@
 
 =head1 NAME
 
-Data::Address - Manages customer IP addresses, to provide DNS into Amazon AWS
+Models::Address - Manages customer IP addresses, to provide DNS into Amazon AWS
 
 =head1 VERSION
 
-This document refers to version 1.0 of Data::Address, released Nov 30, 2008
+This document refers to version 1.0 of Models::Address, released Nov 30, 2008
 
 =head1 DESCRIPTION
 
-Data::Address manages customer IP addresses, to provide DNS into Amazon AWS.
-Be sure to call the class static method connect() before using Data::Address
+Models::Address manages customer IP addresses, to provide DNS into Amazon AWS.
+Be sure to call the class static method connect() before using Models::Address
 objects and disconnect() once you've finished.
 
 =head2 Properties
@@ -53,11 +53,11 @@ The status of the IP address, for example [A]ctive or [D]eleted
 =back
 
 =cut
-package Data::Address;
+package Models::Address;
 $VERSION = "1.0";
 
 use strict;
-use base 'Data::Object';
+use base 'Models::Object';
 use Constants::AWS;
 use Utils::Time;
 {
@@ -147,7 +147,7 @@ sub soft_delete
 
 =head1 DEPENDENCIES
 
-Data::Object, Constants::AWS, Utils::Time
+Models::Object, Constants::AWS, Utils::Time
 
 =head1 AUTHOR
 

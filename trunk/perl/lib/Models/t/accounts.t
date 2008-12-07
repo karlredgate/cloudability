@@ -19,14 +19,14 @@ my %object = (
 );
 
 use Test::More tests => 12;
-use Data::Account;
-Data::Account->connect();
+use Models::Account;
+Models::Account->connect();
 
 # Store and retrieve an object to check all fields
 
-my $inserted = Data::Account->new( %object );
+my $inserted = Models::Account->new( %object );
 $inserted->insert();
-my $retrieved = Data::Account->row($inserted->{id});
+my $retrieved = Models::Account->row($inserted->{id});
 $inserted->delete();
     
 while (my ($field, $value) = each %object)

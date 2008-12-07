@@ -29,11 +29,11 @@ $VERSION = "1.0";
 use strict;
 use Constants::AWS;
 use Clients::Quota;
-use Data::Address;
-use Data::Image;
-use Data::Instance;
-use Data::Snapshot;
-use Data::Volume;
+use Models::Address;
+use Models::Image;
+use Models::Instance;
+use Models::Snapshot;
+use Models::Volume;
 use Utils::Time;
 use Utils::LogFile;
 {
@@ -120,7 +120,7 @@ sub command
     {
         $objects = $self->parse_aws_command($cmd);
         $self->check_for_error($objects);
-        my $address = Data::Address->find_by_public_ip($2);
+        my $address = Models::Address->find_by_public_ip($2);
         $address->soft_delete() if $address->{id};
     }
     elsif ($cmd =~ /^(run|run-instances?|tin|terminate-instances?)/)
@@ -145,7 +145,7 @@ sub command
     {
         $objects = $self->parse_aws_command($cmd, 'snapshotId');
         $self->check_for_error($objects);
-        my $snapshot = Data::Snapshot->find_by_aws_snapshot_id($2);
+        my $snapshot = Models::Snapshot->find_by_aws_snapshot_id($2);
         $snapshot->soft_delete() if $snapshot->{id};
     }
     elsif ($cmd =~ /^(attvol|attach-volume|cvol|create-volume|detvol|detach-volume)/)
@@ -162,7 +162,7 @@ sub command
     {
         $objects = $self->parse_aws_command($cmd, 'volumeId');
         $self->check_for_error($objects);
-        my $volume = Data::Volume->find_by_aws_volume_id($2);
+        my $volume = Models::Volume->find_by_aws_volume_id($2);
         $volume->soft_delete() if $volume->{id};
     }
     else
@@ -320,12 +320,12 @@ sub sync_images
 {
     my ($self, $images) = @_;
 
-    Data::Image->connect();
+    Models::Image->connect();
     foreach my $image (@{$images})
     {
         $image->{aws_is_public} = $image->{aws_is_public} eq 'true' ? 'Y' : 'N';
 
-        my $found = Data::Image->select('aws_image_id = ?', $image->{aws_image_id});
+        my $found = Models::Image->select('aws_image_id = ?', $image->{aws_image_id});
         if ($found->{id})
         {
             $self->copy_object($image, $found);
@@ -333,10 +333,10 @@ sub sync_images
         }
         else
         {
-            Data::Image->new(%{$image})->insert();
+            Models::Image->new(%{$image})->insert();
         }
     }
-    #Data::Image->disconnect();
+    #Models::Image->disconnect();
 }
 
 =item sync_addresses($addresses)
@@ -348,10 +348,10 @@ sub sync_addresses
 {
     my ($self, $addresses) = @_;
 
-    Data::Address->connect();
+    Models::Address->connect();
     foreach my $address (@{$addresses})
     {
-        my $found = Data::Address->select('aws_public_ip = ?', $address->{aws_public_ip});
+        my $found = Models::Address->select('aws_public_ip = ?', $address->{aws_public_ip});
         if ($found->{id})
         {
             # Nothing to do - the only field is the public IP address
@@ -361,10 +361,10 @@ sub sync_addresses
             $address->{account_id} = $self->{account_id} || 0;
             $address->{created_at} = Utils::Time->get_date_time();
             $address->{status} = Constants::AWS::STATUS_ACTIVE;
-            Data::Address->new(%{$address})->insert();
+            Models::Address->new(%{$address})->insert();
         }
     }
-    #Data::Address->disconnect();
+    #Models::Address->disconnect();
 }
 
 =item sync_instances($instances)
@@ -376,7 +376,7 @@ sub sync_instances
 {
     my ($self, $instances) = @_;
 
-    Data::Instance->connect();
+    Models::Instance->connect();
     foreach my $instance (@{$instances})
     {
         $instance->{aws_inst_state} ||= 'unknown';
@@ -386,7 +386,7 @@ sub sync_instances
         $instance->{aws_avail_zone} ||= '';
         $instance->{aws_public_dns} ||= '';
         $instance->{aws_private_dns} ||= '';
-        my $found = Data::Instance->select('aws_instance_id = ?', $instance->{aws_instance_id});
+        my $found = Models::Instance->select('aws_instance_id = ?', $instance->{aws_instance_id});
         if ($found->{id})
         {
             # Deploy to a host if it has just started running
@@ -408,7 +408,7 @@ sub sync_instances
         {
             $instance->{account_id} = $self->{account_id} || 0;
             $instance->{deployment_id} = $self->{deployment_id} || 0;
-            $found = Data::Instance->new(%{$instance});
+            $found = Models::Instance->new(%{$instance});
             $found->insert();
         }
 
@@ -417,7 +417,7 @@ sub sync_instances
         eval { $found->know_host(); };
         $self->{log_file}->warn("know_host: $@") if $@;
     }
-    #Data::Instance->disconnect();
+    #Models::Instance->disconnect();
 }
 
 =item sync_snapshots($snapshots)
@@ -429,10 +429,10 @@ sub sync_snapshots
 {
     my ($self, $snapshots) = @_;
 
-    Data::Snapshot->connect();
+    Models::Snapshot->connect();
     foreach my $snapshot (@{$snapshots})
     {
-        my $found = Data::Snapshot->select('aws_snapshot_id = ?', $snapshot->{aws_snapshot_id});
+        my $found = Models::Snapshot->select('aws_snapshot_id = ?', $snapshot->{aws_snapshot_id});
         if ($found->{id})
         {
             $self->copy_object($snapshot, $found);
@@ -440,13 +440,13 @@ sub sync_snapshots
         }
         else
         {
-            my $volume = Data::Volume->find_by_aws_volume_id($snapshot->{aws_volume_id});
+            my $volume = Models::Volume->find_by_aws_volume_id($snapshot->{aws_volume_id});
             $snapshot->{account_id} = $self->{account_id} || $volume->{account_id} || 0;
             $snapshot->{status} = Constants::AWS::STATUS_ACTIVE;
-            Data::Snapshot->new(%{$snapshot})->insert();
+            Models::Snapshot->new(%{$snapshot})->insert();
         }
     }
-    #Data::Snapshot->disconnect();
+    #Models::Snapshot->disconnect();
 }
 
 =item sync_volumes($volumes)
@@ -458,10 +458,10 @@ sub sync_volumes
 {
     my ($self, $volumes) = @_;
 
-    Data::Volume->connect();
+    Models::Volume->connect();
     foreach my $volume (@{$volumes})
     {
-        my $found = Data::Volume->select('aws_volume_id = ?', $volume->{aws_volume_id});
+        my $found = Models::Volume->select('aws_volume_id = ?', $volume->{aws_volume_id});
         if ($found->{id})
         {
             $self->copy_object($volume, $found);
@@ -469,13 +469,13 @@ sub sync_volumes
         }
         else
         {
-            my $instance = Data::Instance->find_by_aws_instance_id($volume->{aws_instance_id});
+            my $instance = Models::Instance->find_by_aws_instance_id($volume->{aws_instance_id});
             $volume->{account_id} = $self->{account_id} || $instance->{account_id} || 0;
             $volume->{status} = Constants::AWS::STATUS_ACTIVE;
-            Data::Volume->new(%{$volume})->insert();
+            Models::Volume->new(%{$volume})->insert();
         }
     }
-    #Data::Volume->disconnect();
+    #Models::Volume->disconnect();
 }
 
 }1;
@@ -484,7 +484,7 @@ sub sync_volumes
 
 =head1 DEPENDENCIES
 
-Constants::AWS, Clients::Quota, Data::Image, Data::Instance, Data::Snapshot, Data::Volume, Utils::Time, Utils::LogFile
+Constants::AWS, Clients::Quota, Models::Image, Models::Instance, Models::Snapshot, Models::Volume, Utils::Time, Utils::LogFile
 
 =head1 AUTHOR
 

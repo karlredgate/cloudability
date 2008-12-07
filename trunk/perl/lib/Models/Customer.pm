@@ -2,16 +2,16 @@
 
 =head1 NAME
 
-Data::Customer - Manages service customers
+Models::Customer - Manages service customers
 
 =head1 VERSION
 
-This document refers to version 1.0 of Data::Customer, released Nov 07, 2008
+This document refers to version 1.0 of Models::Customer, released Nov 07, 2008
 
 =head1 DESCRIPTION
 
-Data::Customer manages the details for all service customers.
-Be sure to call the class static method connect() before using Data::Customer
+Models::Customer manages the details for all service customers.
+Be sure to call the class static method connect() before using Models::Customer
 objects and disconnect() once you've finished.
 
 =head2 Properties
@@ -109,11 +109,11 @@ The maximum number of volumes this customer may allocate
 =back
 
 =cut
-package Data::Customer;
+package Models::Customer;
 $VERSION = "1.0";
 
 use strict;
-use base 'Data::Object';
+use base 'Models::Object';
 {
     # Class static properties
 
@@ -175,7 +175,7 @@ sub disconnect
 
 =head1 DEPENDENCIES
 
-Data::Object
+Models::Object
 
 =head1 AUTHOR
 

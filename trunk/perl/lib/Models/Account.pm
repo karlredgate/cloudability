@@ -2,67 +2,78 @@
 
 =head1 NAME
 
-Data::CloudJob - Manages jobs to be run by the Server::CloudEngine
+Models::Account - Manages customer accounts
 
 =head1 VERSION
 
-This document refers to version 1.0 of Data::CloudJob, released Nov 29, 2008
+This document refers to version 1.0 of Models::Account, released Nov 07, 2008
 
 =head1 DESCRIPTION
 
-Data::CloudJob manages the details for jobs to be run by Server::CloudEngine.
-Be sure to call the class static method connect() before using Data::CloudJob
+Models::Account manages the details for all customer accounts.
+Be sure to call the class static method connect() before using Models::Account
 objects and disconnect() once you've finished.
 
 =head2 Properties
 
 =over 4
 
-=item priority
+=item customer_id
 
-The job priority
+The account's reseller
 
-=item command
+=item parent_id
 
-The command to run
-
-=item result
-
-The command result
-
-=item submit_time
-
-The time the job was submitted
-
-=item start_time
-
-The time the job was started
-
-=item finish_time
-
-The time the job was finished
-
-=item source_server
-
-The server that created the job
-
-=item target_server
-
-The server that should run the job
+The account's parent
 
 =item status
 
-The status of the job
+The accounts status
+
+=item start_date
+
+The date the account was first signed up
+
+=item end_date
+
+The end date for the account's subscription
+
+=item name
+
+The account holder's name
+
+=item email
+
+The account holder's email address
+
+=item phone
+
+The account holder's phone number
+
+=item username
+
+The account holder's user name
+
+=item password
+
+The account holder's password
+
+=item referrer
+
+How the account holder came to know about the service
+
+=item comments
+
+Any comments about the account
 
 =back
 
 =cut
-package Data::CloudJob;
+package Models::Account;
 $VERSION = "1.0";
 
 use strict;
-use base 'Data::Object';
-use Constants::AWS;
+use base 'Models::Object';
 {
     # Class static properties
 
@@ -89,7 +100,7 @@ sub connect
         $args{host} = $ENV{BACKUP_SERVER};
         $_Connection = $class->SUPER::connect(%args);
     }
-    $class->fields(qw(id priority command result submit_time start_time finish_time source_server target_server status));
+    $class->fields(qw(customer_id parent_id status start_date end_date name email phone username password referrer comments));
 
     return $_Connection;
 }
@@ -108,32 +119,6 @@ sub disconnect
     $class->SUPER::disconnect();
 }
 
-=item submit(command => $command, priority => $priority)
-
-Submit a new cloud job
-
-=cut
-sub submit
-{
-    my ($class, %args) = @_;
-
-    # Default the job details
-
-    $args{command} or die "no job command provided";
-    $args{priority} ||= Constants::AWS::DEFAULT_JOB_PRIORITY;
-    $args{submit_time} ||= time();
-    $args{status} ||= Constants::AWS::STATUS_ACTIVE;
-
-    # Submit the new cloud job
-
-    Data::CloudJob->connect();
-    my $cloud_job = Data::CloudJob->new(%args);
-    $cloud_job->insert();
-    Data::CloudJob->disconnect();
-
-    return $cloud_job;
-}
-
 =back
 
 =head2 Object Methods
@@ -150,7 +135,7 @@ sub submit
 
 =head1 DEPENDENCIES
 
-Data::Object, Constants::General
+Models::Object
 
 =head1 AUTHOR
 

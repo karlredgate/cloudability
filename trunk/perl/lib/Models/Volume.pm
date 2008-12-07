@@ -2,16 +2,16 @@
 
 =head1 NAME
 
-Data::Snapshot - Manages snapshots of volumes, to hold customer data securely
+Models::Volume - Manages customer account volumes, to hold customer data securely
 
 =head1 VERSION
 
-This document refers to version 1.0 of Data::Snapshot, released Nov 28, 2008
+This document refers to version 1.0 of Models::Volume, released Nov 07, 2008
 
 =head1 DESCRIPTION
 
-Data::Snapshot manages snapshots of volumes, to hold customer data securely.
-Be sure to call the class static method connect() before using Data::Volume
+Models::Volume manages customer account volumes, to hold customer data securely.
+Be sure to call the class static method connect() before using Models::Volume
 objects and disconnect() once you've finished.
 
 =head2 Properties
@@ -22,50 +22,62 @@ objects and disconnect() once you've finished.
 
 The volume owner's account ID
 
-=item aws_snapshot_id
-
-The AWS snapshot ID, for example "snap-68719101"
-
 =item aws_volume_id
 
 The AWS volume ID, for example "vol-164ca97f"
 
+=item aws_size
+
+The AWS volume size in GB, for example 100 (can be up to 1000)
+
+=item aws_avail_zone
+
+The AWS volume availability zone, for example "us-east-1a"
+
 =item aws_status
 
-The AWS snapshot status, for example "completed"
+The AWS volume status, for example "available", "deleting" or "deleted"
 
-=item aws_started_at
+=item aws_device
 
-The time when the snapshot was taken
+When attached, the device the AWS volume is attached to, e.g. "/dev/sdx"
 
-=item aws_progress
+=item aws_instance_id
 
-How much of the snapshot has been completed so far, for example "100%"
+When attached, the AWS instance ID to which the AWS volume is attached
+
+=item aws_attached_at
+
+When attached, the date and time the AWS volume was attached to the instance
+
+=item aws_created_at
+
+The AWS date and time the volume was created
 
 =item name
 
-A user-assigned name for the snapshot, for example "Acme data v1"
+A user-assigned name for the volume, for example "Acme data"
 
 =item description
 
-A user-assigned description for the snapshot, for example "Acme's accounts v1"
+A user-assigned description for the volume, for example "Acme's accounts"
 
 =item deleted_at
 
-The date and time the snapshot was deleted
+The date and time the volume was deleted
 
 =item status
 
-The status of the snapshot, for example [A]ctive or [D]eleted
+The status of the volume, for example [A]ctive or [D]eleted
 
 =back
 
 =cut
-package Data::Snapshot;
+package Models::Volume;
 $VERSION = "1.0";
 
 use strict;
-use base 'Data::Object';
+use base 'Models::Object';
 use Constants::AWS;
 use Utils::Time;
 {
@@ -94,7 +106,7 @@ sub connect
         $args{host} = $ENV{BACKUP_SERVER};
         $_Connection = $class->SUPER::connect(%args);
     }
-    $class->fields(qw(account_id aws_snapshot_id aws_volume_id aws_status aws_started_at aws_progress name description deleted_at status));
+    $class->fields(qw(account_id aws_volume_id aws_size aws_avail_zone aws_status aws_device aws_instance_id aws_attached_at aws_created_at name description deleted_at status));
 
     return $_Connection;
 }
@@ -119,26 +131,26 @@ sub disconnect
 
 =over 4
 
-=item find_by_aws_snapshot_id($aws_snapshot_id)
+=item find_by_aws_volume_id($aws_volume_id)
 
-Find a snapshot in the database by its AWS snapshot ID
+Find a volume in the database by its AWS volume ID
 
 =cut
-sub find_by_aws_snapshot_id
+sub find_by_aws_volume_id
 {
-    my ($self, $aws_snapshot_id) = @_;
+    my ($self, $aws_volume_id) = @_;
     my $class = ref $self || $self;
 
     $class->connect();
-    my $snapshot = $class->select('aws_snapshot_id = ?', $aws_snapshot_id);
+    my $volume = $class->select('aws_volume_id = ?', $aws_volume_id);
     #$class->disconnect();
 
-    return $snapshot;
+    return $volume;
 }
 
 =item soft_delete()
 
-Update the snapshot to have a "deleted_at" time and a status of [D]eleted
+Update the volume to have a "deleted_at" time and a status of [D]eleted
 
 =cut
 sub soft_delete
@@ -155,7 +167,7 @@ sub soft_delete
 
 =head1 DEPENDENCIES
 
-Data::Object, Constants::AWS, Utils::Time
+Models::Object, Constants::AWS, Utils::Time
 
 =head1 AUTHOR
 

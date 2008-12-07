@@ -17,14 +17,14 @@ my %object = (
 );
 
 use Test::More tests => 10;
-use Data::Snapshot;
-Data::Snapshot->connect();
+use Models::Snapshot;
+Models::Snapshot->connect();
 
 # Store and retrieve an object to check all fields
 
-my $inserted = Data::Snapshot->new( %object );
+my $inserted = Models::Snapshot->new( %object );
 $inserted->insert();
-my $retrieved = Data::Snapshot->row($inserted->{id});
+my $retrieved = Models::Snapshot->row($inserted->{id});
 $inserted->delete();
     
 while (my ($field, $value) = each %object)

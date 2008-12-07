@@ -13,14 +13,14 @@ my %object = (
 );
 
 use Test::More tests => 6;
-use Data::Deployment;
-Data::Deployment->connect();
+use Models::Deployment;
+Models::Deployment->connect();
 
 # Store and retrieve an object to check all fields
 
-my $inserted = Data::Deployment->new( %object );
+my $inserted = Models::Deployment->new( %object );
 $inserted->insert();
-my $retrieved = Data::Deployment->row($inserted->{id});
+my $retrieved = Models::Deployment->row($inserted->{id});
 $inserted->delete();
     
 while (my ($field, $value) = each %object)

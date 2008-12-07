@@ -26,7 +26,7 @@ $VERSION = "1.0";
 
 use strict;
 use base 'Clients::Admin';
-use Data::AccountConfig;
+use Models::AccountConfig;
 {
     # Class static properties
 
@@ -70,13 +70,13 @@ sub create
 
     # Create a new account config from the values, unless it already exists
 
-    Data::AccountConfig->connect();
-    my $account_config = Data::AccountConfig->select('account_id = ? and field = ?', $account_id, $field);
+    Models::AccountConfig->connect();
+    my $account_config = Models::AccountConfig->select('account_id = ? and field = ?', $account_id, $field);
     die "account config already exists" if $account_config->{id};
     $values->{account_id} = $account_id;
-    $account_config = new Data::AccountConfig(%{$values});
+    $account_config = new Models::AccountConfig(%{$values});
     $account_config->insert();
-    Data::AccountConfig->disconnect();
+    Models::AccountConfig->disconnect();
 
     # Return the new account config ID and account config unblessed for JSON
 
@@ -96,16 +96,16 @@ sub select
 
     # Get the account config
 
-    Data::AccountConfig->connect();
+    Models::AccountConfig->connect();
     my @account_configs = ();
     my $query = 'account_id = ? and field like ?';
-    for (my $account_config = Data::AccountConfig->select($query, $account_id, $field);
+    for (my $account_config = Models::AccountConfig->select($query, $account_id, $field);
             $account_config->{id};
-            $account_config = Data::AccountConfig->next($query))
+            $account_config = Models::AccountConfig->next($query))
     {
         push @account_configs, $account_config->copy(); # unbless for JSON
     }
-    Data::AccountConfig->disconnect();
+    Models::AccountConfig->disconnect();
 
     die "no matching account configs" unless @account_configs;
 
@@ -126,15 +126,15 @@ sub update
 
     # Get the account config to update
 
-    Data::AccountConfig->connect();
-    my $account_config = Data::AccountConfig->select('account_id = ? and field = ?', $account_id, $field);
+    Models::AccountConfig->connect();
+    my $account_config = Models::AccountConfig->select('account_id = ? and field = ?', $account_id, $field);
     die "no matching account config" unless $account_config->{id};
 
     # Update the account config value
 
     $account_config->{value} = $value;
     $account_config->update();
-    Data::AccountConfig->disconnect();
+    Models::AccountConfig->disconnect();
 
     return { status => 'ok', account_config => $account_config->copy() }; # unbless for JSON
 }
@@ -151,14 +151,14 @@ sub delete
 
     # Get the account config to delete
 
-    Data::AccountConfig->connect();
-    my $account_config = Data::AccountConfig->select('account_id = ?', $account_id);
+    Models::AccountConfig->connect();
+    my $account_config = Models::AccountConfig->select('account_id = ?', $account_id);
     die "no matching account config" unless $account_config->{id};
 
     # Delete the object
 
     $account_config->delete();
-    Data::AccountConfig->disconnect();
+    Models::AccountConfig->disconnect();
 
     return { status => 'ok' };
 }
@@ -169,7 +169,7 @@ sub delete
 
 =head1 DEPENDENCIES
 
-Data::AccountConfig
+Models::AccountConfig
 
 =head1 AUTHOR
 

@@ -2,74 +2,49 @@
 
 =head1 NAME
 
-Data::Image - Manages available AWS images for customers to run
+Models::Deployment - Manages the deployment of customer instances
 
 =head1 VERSION
 
-This document refers to version 1.0 of Data::Image, released Nov 07, 2008
+This document refers to version 1.0 of Models::Deployment, released Nov 28, 2008
 
 =head1 DESCRIPTION
 
-Data::Image manages available AWS images for customers to run.
-Be sure to call the class static method connect() before using Data::Image
-objects and disconnect() once you've finished.
+Models::Deployment manages the deployment of customer instances.
+Be sure to call the class static method connect() before using Models::Deployment objects and disconnect() once you've finished.
 
 =head2 Properties
 
 =over 4
 
-=item aws_image_id
+=item account_id
 
-The AWS image ID
+The account holder who created the deployment
 
-=item aws_location
+=item deploy_file
 
-The AWS location of the image manifest file in the S3 storage service
-
-=item aws_state
-
-The AWS state of the image, for example "available"
-
-=item aws_owner_id
-
-The AWS owner ID for the image, for example "992046831893"
-
-=item aws_is_public
-
-Whether the AWS image is publicly available ('Y' or 'N')
-
-=item aws_architecture
-
-The AWS machine architecture of the image, for example "i386"
-
-=item aws_type
-
-The AWS image type, for example "machine"
-
-=item aws_kernel_id
-
-The AWS kernel ID for the image, for example "aki-a71cf9ce"
-
-=item aws_ramdisk_id
-
-The AWS ramdisk ID for the image, for example "ari-a51cf9cc"
+The deployment script file to use when deploying
 
 =item name
 
-A useful human name for the image, for example its operating system "Ubuntu 8.1"
+A user-assigned name for the deployment, for example "Acme web server"
 
 =item description
 
-A useful human description of the AWS image, for example its installed services
+A user-assigned description for the deployment, for example "Site www.acme.com"
+
+=item status
+
+The status of the deployment [A]ctive or [D]eleted
 
 =back
 
 =cut
-package Data::Image;
+package Models::Deployment;
 $VERSION = "1.0";
 
 use strict;
-use base 'Data::Object';
+use base 'Models::Object';
 {
     # Class static properties
 
@@ -96,7 +71,7 @@ sub connect
         $args{host} = $ENV{BACKUP_SERVER};
         $_Connection = $class->SUPER::connect(%args);
     }
-    $class->fields(qw(aws_image_id aws_location aws_state aws_owner_id aws_is_public aws_architecture aws_type aws_kernel_id aws_ramdisk_id name description));
+    $class->fields(qw(account_id deploy_file is_elasic name description status));
 
     return $_Connection;
 }
@@ -131,7 +106,7 @@ sub disconnect
 
 =head1 DEPENDENCIES
 
-Data::Object
+Models::Object
 
 =head1 AUTHOR
 

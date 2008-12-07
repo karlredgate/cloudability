@@ -25,7 +25,7 @@ package Servers::CloudEngine;
 $VERSION = "1.0";
 
 use strict;
-use Data::CloudJob;
+use Models::CloudJob;
 use Utils::LogFile;
 use IO::Socket;
 {
@@ -99,8 +99,8 @@ sub run
 
         # Find jobs that are ready to run
 
-        Data::CloudJob->connect();
-        Data::CloudJob->sql("lock tables cloud_jobs write");
+        Models::CloudJob->connect();
+        Models::CloudJob->sql("lock tables cloud_jobs write");
         my @jobs = $self->find_jobs($lowest_job_id); $lowest_job_id = 0;
         @jobs = $self->sort_jobs(@jobs);
         my $jobs_started = 0;
@@ -145,8 +145,8 @@ sub run
                 $self->{log_file}->info("Running job $cloud_job_id: $command");
             }
         }
-        Data::CloudJob->sql("unlock tables");
-        Data::CloudJob->disconnect();
+        Models::CloudJob->sql("unlock tables");
+        Models::CloudJob->disconnect();
     }
 }
 
@@ -161,9 +161,9 @@ sub find_jobs
     my @jobs;
 
     my $query = "id > ? and status = ?";
-    for (my $cloud_job = Data::CloudJob->select($query, $lowest_job_id, Constants::AWS::STATUS_ACTIVE);
+    for (my $cloud_job = Models::CloudJob->select($query, $lowest_job_id, Constants::AWS::STATUS_ACTIVE);
             $cloud_job->{id};
-            $cloud_job = Data::CloudJob->next($query, $lowest_job_id))
+            $cloud_job = Models::CloudJob->next($query, $lowest_job_id))
     {
         push @jobs, $cloud_job;
     }
@@ -205,7 +205,7 @@ sub DESTROY
 
 =head1 DEPENDENCIES
 
-Data::CloudJob, Utils::LogFile, IO::Socket
+Models::CloudJob, Utils::LogFile, IO::Socket
 
 =head1 AUTHOR
 

@@ -26,12 +26,12 @@ $VERSION = "1.0";
 
 use strict;
 use Constants::AWS;
-use Data::Customer;
-use Data::Account;
-use Data::Address;
-use Data::Instance;
-use Data::Snapshot;
-use Data::Volume;
+use Models::Customer;
+use Models::Account;
+use Models::Address;
+use Models::Instance;
+use Models::Snapshot;
+use Models::Volume;
 {
     # Class static properties
 
@@ -52,23 +52,23 @@ sub new
 
     # Get account details
 
-    Data::Account->connect();
-    my $account = Data::Account->select('id = ?', $account_id);
+    Models::Account->connect();
+    my $account = Models::Account->select('id = ?', $account_id);
     die "no account with ID $account_id" unless $account->{id};
 
     # Get customer details
 
-    Data::Customer->connect();
-    my $customer = Data::Customer->select('id = ?', $account->{customer_id});
+    Models::Customer->connect();
+    my $customer = Models::Customer->select('id = ?', $account->{customer_id});
     die "no customer with ID $account->{customer_id}" unless $customer->{id};
 
     # Get the IDs of all customer accounts
 
     my @account_ids;
     my $query = 'customer_id = ?';
-    for (my $account = Data::Account->select($query, $customer->{id});
+    for (my $account = Models::Account->select($query, $customer->{id});
             $account->{id};
-            $account = Data::Account->next($query))
+            $account = Models::Account->next($query))
     {
         push @account_ids, $account->{id};
     }
@@ -118,11 +118,11 @@ sub address_quota
     my ($self) = @_;
 
     my $has_addresses = 0;
-    Data::Address->connect();
+    Models::Address->connect();
     my $query = $self->get_query();
-    for (my $address = Data::Address->select($query);
+    for (my $address = Models::Address->select($query);
             $address->{id};
-            $address = Data::Address->next($query))
+            $address = Models::Address->next($query))
     {
         $has_addresses++ if $address->{status} eq Constants::AWS::STATUS_ACTIVE;
     }
@@ -139,11 +139,11 @@ sub instance_quota
     my ($self) = @_;
 
     my $has_instances = 0;
-    Data::Instance->connect();
+    Models::Instance->connect();
     my $query = $self->get_query();
-    for (my $instance = Data::Instance->select($query);
+    for (my $instance = Models::Instance->select($query);
             $instance->{id};
-            $instance = Data::Instance->next($query))
+            $instance = Models::Instance->next($query))
     {
         $has_instances++ if $instance->{status} eq Constants::AWS::STATUS_RUNNING;
     }
@@ -160,11 +160,11 @@ sub snapshot_quota
     my ($self) = @_;
 
     my $has_snapshots = 0;
-    Data::Snapshot->connect();
+    Models::Snapshot->connect();
     my $query = $self->get_query();
-    for (my $snapshot = Data::Snapshot->select($query);
+    for (my $snapshot = Models::Snapshot->select($query);
             $snapshot->{id};
-            $snapshot = Data::Snapshot->next($query))
+            $snapshot = Models::Snapshot->next($query))
     {
         $has_snapshots++ if $snapshot->{status} eq Constants::AWS::STATUS_ACTIVE;
     }
@@ -181,11 +181,11 @@ sub volume_quota
     my ($self) = @_;
 
     my $has_volumes = 0;
-    Data::Volume->connect();
+    Models::Volume->connect();
     my $query = $self->get_query();
-    for (my $volume = Data::Volume->select($query);
+    for (my $volume = Models::Volume->select($query);
             $volume->{id};
-            $volume = Data::Volume->next($query))
+            $volume = Models::Volume->next($query))
     {
         $has_volumes++ if $volume->{status} eq Constants::AWS::STATUS_ACTIVE;
     }
@@ -198,7 +198,7 @@ sub volume_quota
 
 =head1 DEPENDENCIES
 
-Constants::AWS, Data::Customer, Data::Account, Data::Address, Data::Instance, Data::Snapshot, Data::Volume
+Constants::AWS, Models::Customer, Models::Account, Models::Address, Models::Instance, Models::Snapshot, Models::Volume
 
 =head1 AUTHOR
 

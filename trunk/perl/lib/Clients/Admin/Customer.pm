@@ -26,7 +26,7 @@ $VERSION = "1.0";
 
 use strict;
 use base 'Clients::Admin';
-use Data::Customer;
+use Models::Customer;
 {
     # Class static properties
 
@@ -68,19 +68,19 @@ sub create
 
     # Check that the customer has not already been added
 
-    Data::Customer->connect();
-    my $customer = Data::Customer->select('company = ?', $company);
+    Models::Customer->connect();
+    my $customer = Models::Customer->select('company = ?', $company);
     die "customer already exists with name $company" if $customer->{id};
 
     # Create a new customer from the values, but use defaults
 
-    $customer = Data::Customer->new(%{$values});
+    $customer = Models::Customer->new(%{$values});
 
     # Insert the new customer
 
     $customer->insert();
-    $customer = Data::Customer->row($customer->{id}); # get missing fields
-    Data::Customer->disconnect();
+    $customer = Models::Customer->row($customer->{id}); # get missing fields
+    Models::Customer->disconnect();
 
     # Return the new customer ID and customer, unblessed for JSON
 
@@ -98,9 +98,9 @@ sub select
 
     # Get a matching customer
 
-    Data::Customer->connect();
+    Models::Customer->connect();
     my $customer = $self->get_customer($values);
-    Data::Customer->disconnect();
+    Models::Customer->disconnect();
 
     return { status => 'ok', customer => $customer->copy() }; # unbless for JSON
 }
@@ -116,7 +116,7 @@ sub update
 
     # Get a matching customer
 
-    Data::Customer->connect();
+    Models::Customer->connect();
     my $customer = $self->get_customer($values);
 
     # Update the customer
@@ -126,7 +126,7 @@ sub update
         $customer->{$key} = $values->{$key};
     }
     $customer->update();
-    Data::Customer->disconnect();
+    Models::Customer->disconnect();
 
     return { status => 'ok', customer => $customer->copy() }; # unbless for JSON
 }
@@ -142,13 +142,13 @@ sub delete
 
     # Get a matching customer
 
-    Data::Customer->connect();
+    Models::Customer->connect();
     my $customer = $self->get_customer($values);
 
     # Delete the object
 
     $customer->delete();
-    Data::Customer->disconnect();
+    Models::Customer->disconnect();
 
     return { status => 'ok' };
 }
@@ -167,8 +167,8 @@ sub get_customer
 
     # Get the matching customer
 
-    my $customer = $customer_id ? Data::Customer->row($customer_id)
-                                : Data::Customer->select('company like ?', $company);
+    my $customer = $customer_id ? Models::Customer->row($customer_id)
+                                : Models::Customer->select('company like ?', $company);
     die "no matching customer" unless $customer->{id};
 
     # Check the customer ID for permission
@@ -187,7 +187,7 @@ sub get_customer
 
 =head1 DEPENDENCIES
 
-Data::Customer
+Models::Customer
 
 =head1 AUTHOR
 

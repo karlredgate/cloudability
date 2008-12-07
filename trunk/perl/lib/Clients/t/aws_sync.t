@@ -5,11 +5,11 @@ use warnings;
 
 use Test::More tests => 32;
 use Clients::AWS;
-use Data::Image;
-use Data::Address;
-use Data::Instance;
-use Data::Snapshot;
-use Data::Volume;
+use Models::Image;
+use Models::Address;
+use Models::Instance;
+use Models::Snapshot;
+use Models::Volume;
 
 # Set-up some test objects to check the results
 
@@ -77,19 +77,19 @@ my $aws = Clients::AWS->new();
 
 # Connect to the database
 
-Data::Image->connect();
-Data::Address->connect();
-Data::Instance->connect();
-Data::Snapshot->connect();
-Data::Volume->connect();
+Models::Image->connect();
+Models::Address->connect();
+Models::Instance->connect();
+Models::Snapshot->connect();
+Models::Volume->connect();
 
 # Delete any old data from the test database
 
-Data::Image->sql("delete from images");
-Data::Address->sql("delete from addresses");
-Data::Instance->sql("delete from instances");
-Data::Snapshot->sql("delete from snapshots");
-Data::Volume->sql("delete from volumes");
+Models::Image->sql("delete from images");
+Models::Address->sql("delete from addresses");
+Models::Instance->sql("delete from instances");
+Models::Snapshot->sql("delete from snapshots");
+Models::Volume->sql("delete from volumes");
 
 # Run the synchronize command on mock data
 
@@ -98,35 +98,35 @@ my $check;
 
 # Run tests to compare the database with the mock data we used
 
-my $image = Data::Image->select('aws_image_id = ?', 'ami-050de96c');
+my $image = Models::Image->select('aws_image_id = ?', 'ami-050de96c');
 $check = $images->{'ami-050de96c'};
 while (my ($field, $value) = each %{$check})
 {
     is $image->{$field}, $value, "image: retrieved $field is $value";
 }
 
-my $address = Data::Address->select('aws_public_ip = ?', '75.101.151.221');
+my $address = Models::Address->select('aws_public_ip = ?', '75.101.151.221');
 $check = $addresses->{'75.101.151.221'};
 while (my ($field, $value) = each %{$check})
 {
     is $address->{$field}, $value, "address: retrieved $field is $value";
 }
 
-my $instance = Data::Instance->select('aws_instance_id = ?', 'i-f63a889f');
+my $instance = Models::Instance->select('aws_instance_id = ?', 'i-f63a889f');
 $check = $instances->{'i-f63a889f'};
 while (my ($field, $value) = each %{$check})
 {
     is $instance->{$field}, $value, "instance: retrieved $field is $value";
 }
 
-my $snapshot = Data::Snapshot->select('aws_snapshot_id = ?', 'snap-f85fbf91');
+my $snapshot = Models::Snapshot->select('aws_snapshot_id = ?', 'snap-f85fbf91');
 $check = $snapshots->{'snap-f85fbf91'};
 while (my ($field, $value) = each %{$check})
 {
     is $snapshot->{$field}, $value, "snapshot: retrieved $field is $value";
 }
 
-my $volume = Data::Volume->select('aws_volume_id = ?', 'vol-e8bb5f81');
+my $volume = Models::Volume->select('aws_volume_id = ?', 'vol-e8bb5f81');
 $check = $volumes->{'vol-e8bb5f81'};
 while (my ($field, $value) = each %{$check})
 {
