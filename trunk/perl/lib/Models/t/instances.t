@@ -3,10 +3,12 @@
 use strict;
 use warnings;
 
+my $aws_instance_id = 'i-4064d929';
+
 my %object = (
     account_id      => 1,
     deployment_id   => 1,
-    aws_instance_id => 'aws_instance_id',
+    aws_instance_id => $aws_instance_id,
     aws_image_id    => 'aws_image_id',
     aws_kernel_id   => 'aws_kernel_id',
     aws_ramdisk_id  => 'aws_ramdisk_id',
@@ -32,12 +34,14 @@ Models::Instance->connect();
 
 my $inserted = Models::Instance->new( %object );
 $inserted->insert();
-my $retrieved = Models::Instance->row($inserted->{id});
+my $retrieved = Models::Instance->find_by_aws_instance_id($aws_instance_id);
 $inserted->delete();
     
 while (my ($field, $value) = each %object)
 {
     is $retrieved->{$field}, $value, "retrieved $field is $value";
 }
+
+# TODO: Find a way to test the "deploy_to_host()" method without "system" calls
 
 __END__
