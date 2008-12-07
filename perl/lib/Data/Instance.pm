@@ -22,6 +22,10 @@ objects and disconnect() once you've finished.
 
 The account running the instance
 
+=item deployment_id
+
+The deployment used to configure the instance
+
 =item aws_instance_id
 
 The AWS instance ID
@@ -82,10 +86,6 @@ A user-assigned name for the instance, for example "Acme web server"
 
 A user-assigned description for the instance, for example "Site www.acme.com"
 
-=item init_file
-
-The init file that was used to configure the instance on start-up
-
 =item status
 
 The status of the image [P]ending, [R]unning, [S]hutting down or [T]erminated
@@ -126,7 +126,7 @@ sub connect
         $args{host} = $ENV{BACKUP_SERVER};
         $_Connection = $class->SUPER::connect(%args);
     }
-    $class->fields(qw(account_id aws_instance_id aws_image_id aws_kernel_id aws_ramdisk_id aws_inst_state aws_inst_type aws_avail_zone aws_key_name aws_public_dns aws_private_dns aws_started_at aws_finished_at aws_term_reason name description init_file status));
+    $class->fields(qw(account_id deployment_id aws_instance_id aws_image_id aws_kernel_id aws_ramdisk_id aws_inst_state aws_inst_type aws_avail_zone aws_key_name aws_public_dns aws_private_dns aws_started_at aws_finished_at aws_term_reason name description status));
 
     return $_Connection;
 }
@@ -168,21 +168,23 @@ sub find_by_aws_instance_id
     return $instance;
 }
 
-=item init_host($aws_cmd)
+=item deploy_host($aws_cmd)
 
-Initialize a host that has just started running by running an init file
+Deploy to a host that has just started running by running a "deploy file"
 
 =cut
-sub init_host
+sub deploy_to_host
 {
     my ($self, $aws_cmd) = @_;
     return if $self->{status} ne Constants::AWS::STATUS_RUNNING;
     die "no AWS public DNS host name" unless $self->{aws_public_dns};
 
     $self->know_host(); # so we don't get prompted for SSH/SCP configmations
-    my $init_file = $self->{init_file} || Constants::AWS::INIT_FILE;
-    open (INIT, "$ENV{INIT_DIR}/$init_file") or die "no init file";
-    while (my $command = <INIT>)
+    Data::Deployment->connect();
+    my $deployment = Data::Deployment->row($self->{deployment_id});
+    my $deploy_file = $deployment->{deploy_file} || Constants::AWS::DEPLOY_FILE;
+    open (DEPLOY_FILE, "$ENV{DEPLOY_DIR}/$deploy_file") or die "no deploy file";
+    while (my $command = <DEPLOY_FILE>)
     {
         # Substitute "INSTANCE", "HOST", "KEY" and "AWS" in the command line
 
@@ -196,7 +198,7 @@ sub init_host
 
         system $command;
     }
-    close INIT;
+    close DEPLOY_FILE;
 }
 
 =item know_host()

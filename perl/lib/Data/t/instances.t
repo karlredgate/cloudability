@@ -5,6 +5,7 @@ use warnings;
 
 my %object = (
     account_id      => 1,
+    deployment_id   => 1,
     aws_instance_id => 'aws_instance_id',
     aws_image_id    => 'aws_image_id',
     aws_kernel_id   => 'aws_kernel_id',
@@ -20,7 +21,6 @@ my %object = (
     aws_term_reason => 'aws_term_reason',
     name            => 'name',
     description     => 'description',
-    init_file       => 'init_file',
     status          => 'R',
 );
 

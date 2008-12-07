@@ -84,6 +84,7 @@ create table if not exists instances
 (
     id              INTEGER UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     account_id      INTEGER UNSIGNED NOT NULL,
+    deployment_id   INTEGER UNSIGNED NOT NULL,
     aws_instance_id VARCHAR(255) NOT NULL,
     aws_image_id    VARCHAR(255) NOT NULL,
     aws_kernel_id   VARCHAR(255) NOT NULL,
@@ -99,22 +100,25 @@ create table if not exists instances
     aws_term_reason VARCHAR(255),
     name            VARCHAR(255),
     description     MEDIUMTEXT,
-    init_file       VARCHAR(255),
     status          CHAR(1) NOT NULL DEFAULT 'R',
 
     KEY             account_id (account_id),
+    KEY             deployment_id (deployment_id),
     KEY             aws_instance_id (aws_instance_id),
     KEY             aws_image_id (aws_image_id)
 ) MAX_ROWS = 4294967296;
 
-create table if not exists instance_configs
+create table if not exists deployments
 (
     id              INTEGER UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    instance_id     INTEGER UNSIGNED NOT NULL,
-    field           VARCHAR(255) NOT NULL,
-    value           MEDIUMTEXT NOT NULL DEFAULT '',
+    account_id      INTEGER UNSIGNED NOT NULL,
+    deploy_file     VARCHAR(255) NOT NULL,
+    is_elasic       ENUM('Y','N'),
+    name            VARCHAR(255),
+    description     MEDIUMTEXT,
+    status          CHAR(1) NOT NULL DEFAULT 'A',
 
-    KEY             instance_id (instance_id)
+    KEY             account_id (account_id)
 ) MAX_ROWS = 4294967296;
 
 create table if not exists volumes

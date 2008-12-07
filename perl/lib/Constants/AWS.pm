@@ -26,9 +26,9 @@ $VERSION = "1.0";
 
 use strict;
 
-# The default file used to initialize servers
+# The default file used to deploy servers
 
-use constant INIT_FILE => 'init.sh';
+use constant DEPLOY_FILE => 'default.sh';
 
 # Translate Amazon AWS fields to local names
 # Note that "PARSE" causes recursive parsing
