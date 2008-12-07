@@ -1,4 +1,4 @@
-# Replace this with a list of initialization commands for a
+# Replace this with a list of deployment command lines for a
 # newly started server using placeholders instead of values:
 # - "INSTANCE" is the AWS instance ID of the new instance
 # - "HOST" is the public DNS hostname of the new instance

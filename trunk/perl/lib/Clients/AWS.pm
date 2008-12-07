@@ -40,7 +40,7 @@ use Utils::LogFile;
     # Class static properties
 
     my $_AWS_COMMAND = "$ENV{CLOUDABILITY_HOME}/bin/aws";
-    my $_AWS_WRAPPER = "$ENV{CLOUDABILITY_HOME}/perl/aws.pl"; # for init files
+    my $_AWS_WRAPPER = "$ENV{CLOUDABILITY_HOME}/perl/aws.pl"; # for deploy files
 
 =head2 Class Methods
 
@@ -62,7 +62,7 @@ sub new
     my $self = {
         aws_owner_id    => $aws_owner_id,
         account_id      => 0, # see the command() method below
-        init_file       => '', # see the command() method below
+        deployment_id   => 0, # see the command() method below
         log_file        => Utils::LogFile->new("$ENV{LOGS_DIR}/aws"),
     };
 
@@ -129,7 +129,7 @@ sub command
         {
             die "no instance quota" unless $quota->instance_quota() > 0;
         }
-        $self->{init_file} = $1 if $cmd =~ /-d\s+(\S+)/;
+        $self->{deployment_id} = $1 if $cmd =~ /-d\s+(\S+)/;
         $objects = $self->parse_aws_command($cmd, 'instanceId');
         $self->check_for_error($objects);
         $self->sync_instances($objects);
@@ -389,25 +389,25 @@ sub sync_instances
         my $found = Data::Instance->select('aws_instance_id = ?', $instance->{aws_instance_id});
         if ($found->{id})
         {
-            # Initialize a host if it has just started running
+            # Deploy to a host if it has just started running
 
-            my $needs_to_init = 0;
+            my $needs_to_deploy = 0;
             if ($instance->{status} eq Constants::AWS::STATUS_RUNNING
                 && $found->{status} ne Constants::AWS::STATUS_RUNNING)
             {
-                $needs_to_init = 1;
+                $needs_to_deploy = 1;
             }
 
             # Copy the instance state over to the found instance
 
             $self->copy_object($instance, $found);
             $found->update();
-            $found->init_host($_AWS_WRAPPER) if $needs_to_init;
+            $found->deploy_to_host($_AWS_WRAPPER) if $needs_to_deploy;
         }
         else
         {
             $instance->{account_id} = $self->{account_id} || 0;
-            $instance->{init_file} = $self->{init_file} || Constants::AWS::INIT_FILE;
+            $instance->{deployment_id} = $self->{deployment_id} || 0;
             $found = Data::Instance->new(%{$instance});
             $found->insert();
         }
