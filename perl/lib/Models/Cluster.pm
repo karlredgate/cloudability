@@ -2,16 +2,16 @@
 
 =head1 NAME
 
-Models::Deployment - Manages the deployment of customer instances
+Models::Cluster - Manages the deployment of customer instances in clusters
 
 =head1 VERSION
 
-This document refers to version 1.0 of Models::Deployment, released Nov 28, 2008
+This document refers to version 1.0 of Models::Cluster, released Dec 07, 2008
 
 =head1 DESCRIPTION
 
-Models::Deployment manages the deployment of customer instances.
-Be sure to call the class static method connect() before using Models::Deployment objects and disconnect() once you've finished.
+Models::Cluster manages the deployment of customer instances in clusters.
+Be sure to call the class static method connect() before using Models::Cluster objects and disconnect() once you've finished.
 
 =head2 Properties
 
@@ -19,31 +19,51 @@ Be sure to call the class static method connect() before using Models::Deploymen
 
 =item account_id
 
-The account holder who created the deployment
+The account holder who created the cluster
 
-=item aws_image_id
+=item deployment_id
 
-The AWS image ID
+The deployment ID which will be used to deploy the cluster
 
-=item aws_inst_type
+=item instances_max
 
-The AWS instance type (e.g. "c1.medium")
+The maximum numer of instances to run in the cluster
 
-=item aws_avail_zone
+=item instances_min
 
-The AWS availability zone (placement)
+The minimum number of instances to run in the cluster
 
-=item aws_sec_group
+=item run_hours_max
 
-The AWS security group (default is "default")
+The maximum numer of hours to run any instance in the cluster
 
-=item aws_key_name
+=item run_hours_min
 
-The AWS key name for root access
+The minimum number of hours to run any instance in the cluster
 
-=item deploy_file
+=item load_too_high
 
-The deployment script file to use when deploying
+The load level at which to increase the number of running instances
+
+=item load_too_low
+
+The load level at which to terminate a running instance in the cluster
+
+=item process_name
+
+The name of the process to count (e.g. "apache" or "postfix")
+
+=item proc_too_many
+
+The process count at which to increase the number of running instances
+
+=item proc_too_few
+
+The process count at which to terminate a running instance in the cluster
+
+=item is_balanced
+
+Whether or not to include the cluster in load balancing ([Y]es or [N]o)
 
 =item name
 
@@ -60,7 +80,7 @@ The status of the deployment [A]ctive or [D]eleted
 =back
 
 =cut
-package Models::Deployment;
+package Models::Cluster;
 $VERSION = "1.0";
 
 use strict;
@@ -92,7 +112,7 @@ sub connect
         $args{host} = $ENV{BACKUP_SERVER};
         $_Connection = $class->SUPER::connect(%args);
     }
-    $class->fields(qw(account_id aws_image_id aws_inst_type aws_avail_zone aws_sec_group aws_key_name deploy_file is_elasic name description status));
+    $class->fields(qw(account_id deployment_id instances_max instances_min run_hours_max run_hours_min load_too_high load_too_low process_name proc_too_many proc_too_few is_balanced name description status));
 
     return $_Connection;
 }
@@ -117,29 +137,21 @@ sub disconnect
 
 =over 4
 
-=item to_aws_command()
+=item manage()
 
-Transform a deployment definition into an AWS command (minus the "aws" bit)
+TODO: Manage a cluster
 
 =cut
-sub to_aws_command
+sub manage
 {
     my ($self) = @_;
-    die "no image ID in deployment $self->{id}" unless $self->{aws_image_id};
 
-    my $command = 'run ' . $self->{aws_image_id};
-    $command .= ' -k ' . $self->{aws_key_name} if $self->{aws_key_name};
-    $command .= ' -i ' . $self->{aws_inst_type} if $self->{aws_inst_type};
-    $command .= ' -z ' . $self->{aws_avail_zone} if $self->{aws_avail_zone};
-    $command .= ' -g ' . $self->{aws_sec_group} if $self->{aws_sec_group};
-    $command .= ' -d ' . $self->{id}; # to help us to "connect the dots"
-
-    return $command;
+    # TODO
 }
 
 =item soft_delete()
 
-Update the deployment to have a "deleted_at" time and a status of [D]eleted
+Update the cluster to have a "deleted_at" time and a status of [D]eleted
 
 =cut
 sub soft_delete

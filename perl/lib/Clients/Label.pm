@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-Clients::Label - Label AWS resources and return results as XML by default
+Clients::Label - Label resources and return results as XML by default
 
 =head1 VERSION
 
@@ -10,7 +10,7 @@ This document refers to version 1.0 of Clients::Label, released Dec 03, 2008
 
 =head1 DESCRIPTION
 
-Clients::Label labels AWS resources and returns results as XML by default.
+Clients::Label labels resources and returns results as XML by default.
 
 =head2 Properties
 
@@ -25,12 +25,9 @@ package Clients::Label;
 $VERSION = "1.0";
 
 use strict;
-use Models::Address;
-use Models::Instance;
-use Models::Snapshot;
-use Models::Volume;
 use XML::Simple;
 use JSON;
+# Models::Misc classes are loaded dynamically in the "label()" method below
 {
     # Class static properties
 
@@ -100,6 +97,12 @@ sub set
         $obj = $self->label('Models::Address', 'aws_public_ip', $id, $name, $desc)
                                                     if $entity eq 'address';
 
+        $obj = $self->label('Models::Cluster', 'name', $id, $name, $desc)
+                                                    if $entity eq 'cluster';
+
+        $obj = $self->label('Models::Deployment', 'name', $id, $name, $desc)
+                                                    if $entity eq 'deployment';
+
         $obj = $self->label('Models::Instance', 'aws_instance_id', $id, $name, $desc)
                                                     if $entity eq 'instance';
 
@@ -142,15 +145,16 @@ sub set
 
 =item label($klass, $id_field, $id, $name, $desc)
 
-Set a name and description label on an AWS resource object found with an ID
+Set a name and description label on a resource object found with an ID
 
 =cut
 sub label
 {
     my ($self, $klass, $id_field, $id, $name, $desc) = @_;
 
-    # Use either a numeric ID or an AWS ID to be more user-friendly
+    # Use either a numeric ID or an alternative ID to be more user-friendly
 
+    eval "require $klass;"; die $@ if $@;
     $klass->connect();
     my $object = $id =~ /^\d+$/ ? $klass->row($id)
                                 : $klass->select("$id_field = ?", $id);
@@ -225,7 +229,7 @@ sub json_result
 
 =head1 DEPENDENCIES
 
-Models::Address, Models::Instance, Models::Snapshot, Models::Volume, XML::Simple, JSON
+Models::Address, Models::Cluster, Models::Deployment, Models::Instance, Models::Snapshot, Models::Volume, XML::Simple, JSON
 
 =head1 AUTHOR
 

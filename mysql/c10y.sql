@@ -84,6 +84,7 @@ create table if not exists instances
 (
     id              INTEGER UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     account_id      INTEGER UNSIGNED NOT NULL,
+    cluster_id      INTEGER UNSIGNED NOT NULL,
     deployment_id   INTEGER UNSIGNED NOT NULL,
     aws_instance_id VARCHAR(255) NOT NULL,
     aws_image_id    VARCHAR(255) NOT NULL,
@@ -103,6 +104,7 @@ create table if not exists instances
     status          CHAR(1) NOT NULL DEFAULT 'R',
 
     KEY             account_id (account_id),
+    KEY             cluster_id (cluster_id),
     KEY             deployment_id (deployment_id),
     KEY             aws_instance_id (aws_instance_id),
     KEY             aws_image_id (aws_image_id)
@@ -124,6 +126,29 @@ create table if not exists deployments
     status          CHAR(1) NOT NULL DEFAULT 'A',
 
     KEY             account_id (account_id)
+) MAX_ROWS = 4294967296;
+
+create table if not exists clusters
+(
+    id              INTEGER UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    account_id      INTEGER UNSIGNED NOT NULL,
+    deployment_id   INTEGER UNSIGNED NOT NULL,
+    instances_max   SMALLINT UNSIGNED NOT NULL,
+    instances_min   SMALLINT UNSIGNED,
+    run_hours_max   SMALLINT UNSIGNED,
+    run_hours_min   SMALLINT UNSIGNED,
+    load_too_high   DECIMAL(4,2) UNSIGNED,
+    load_too_low    DECIMAL(4,2) UNSIGNED,
+    process_name    VARCHAR(255),
+    proc_too_many   SMALLINT UNSIGNED,
+    proc_too_few    SMALLINT UNSIGNED,
+    is_balanced     ENUM('Y','N') NOT NULL DEFAULT 'N',
+    name            VARCHAR(255),
+    description     MEDIUMTEXT,
+    status          CHAR(1) NOT NULL DEFAULT 'A',
+
+    KEY             account_id (account_id),
+    KEY             deployment_id (deployment_id)
 ) MAX_ROWS = 4294967296;
 
 create table if not exists volumes
