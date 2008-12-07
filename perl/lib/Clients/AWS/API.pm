@@ -124,9 +124,18 @@ sub command
         };
         $objects = [ $object ];
     }
+    elsif ($command =~ /^deploy\s+(.+)/)
+    {
+        # Submit a deployment cloud job for processing ASAP by cloudengine.pl
+
+        my $deployment = $1;
+        my $job = Models::CloudJob->submit(command => "$ENV{CLOUDABILITY_HOME}/perl/deploy.pl $account->{id} \"$deployment\"");
+        $self->{object_type} = 'job';
+        $objects = [ $job ];
+    }
     else
     {
-        # Submit a cloud job for processing ASAP
+        # Submit any other cloud job for processing ASAP by cloudengine.pl
 
         my $job = Models::CloudJob->submit(command => "$ENV{CLOUDABILITY_HOME}/perl/aws.pl $account->{id} $command");
         $self->{object_type} = 'job';

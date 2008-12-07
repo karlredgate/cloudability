@@ -122,6 +122,7 @@ sub submit
     $args{command} or die "no job command provided";
     $args{priority} ||= Constants::AWS::DEFAULT_JOB_PRIORITY;
     $args{submit_time} ||= time();
+    $args{source_server} = $ENV{HOSTNAME};
     $args{status} ||= Constants::AWS::STATUS_ACTIVE;
 
     # Submit the new cloud job
