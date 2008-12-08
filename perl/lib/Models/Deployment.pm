@@ -53,6 +53,10 @@ A user-assigned name for the deployment, for example "Acme web server"
 
 A user-assigned description for the deployment, for example "Site www.acme.com"
 
+=item deleted_at
+
+The date and time the deployment was deleted
+
 =item status
 
 The status of the deployment [A]ctive or [D]eleted
@@ -66,6 +70,7 @@ $VERSION = "1.0";
 use strict;
 use base 'Models::Object';
 use Constants::AWS;
+use Utils::Time;
 {
     # Class static properties
 
@@ -92,7 +97,7 @@ sub connect
         $args{host} = $ENV{BACKUP_SERVER};
         $_Connection = $class->SUPER::connect(%args);
     }
-    $class->fields(qw(account_id aws_image_id aws_inst_type aws_avail_zone aws_sec_group aws_key_name deploy_file is_elasic name description status));
+    $class->fields(qw(account_id aws_image_id aws_inst_type aws_avail_zone aws_sec_group aws_key_name deploy_file is_elasic name description deleted_at status));
 
     return $_Connection;
 }
@@ -156,7 +161,7 @@ sub soft_delete
 
 =head1 DEPENDENCIES
 
-Models::Object, Constants::AWS
+Models::Object, Constants::AWS, Utils::Time
 
 =head1 AUTHOR
 

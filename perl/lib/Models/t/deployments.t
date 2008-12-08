@@ -17,7 +17,7 @@ my %object = (
     status          => 'A',
 );
 
-use Test::More tests => 11;
+use Test::More tests => 12;
 use Models::Deployment;
 Models::Deployment->connect();
 
@@ -25,6 +25,15 @@ Models::Deployment->connect();
 
 my $inserted = Models::Deployment->new( %object );
 $inserted->insert();
+
+# Test the "soft_delete()" method
+
+$inserted->soft_delete();
+$object{status} = Constants::AWS::STATUS_DELETED;
+$object{deleted_at} = $inserted->{deleted_at};
+
+# Retrieve the "soft_deleted" object and really delete it
+
 my $retrieved = Models::Deployment->row($inserted->{id});
 $inserted->delete();
     
