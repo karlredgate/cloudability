@@ -123,6 +123,7 @@ create table if not exists deployments
     is_elasic       ENUM('Y','N'),
     name            VARCHAR(255),
     description     MEDIUMTEXT,
+    deleted_at      DATETIME,
     status          CHAR(1) NOT NULL DEFAULT 'A',
 
     KEY             account_id (account_id)
@@ -142,9 +143,10 @@ create table if not exists clusters
     process_name    VARCHAR(255),
     proc_too_many   SMALLINT UNSIGNED,
     proc_too_few    SMALLINT UNSIGNED,
-    is_balanced     ENUM('Y','N') NOT NULL DEFAULT 'N',
+    pound_file      VARCHAR(255),
     name            VARCHAR(255),
     description     MEDIUMTEXT,
+    deleted_at      DATETIME,
     status          CHAR(1) NOT NULL DEFAULT 'A',
 
     KEY             account_id (account_id),

@@ -61,9 +61,9 @@ The process count at which to increase the number of running instances
 
 The process count at which to terminate a running instance in the cluster
 
-=item is_balanced
+=item pound_file
 
-Whether or not to include the cluster in load balancing ([Y]es or [N]o)
+The Pound load balancer config file to use to run the cluster
 
 =item name
 
@@ -72,6 +72,10 @@ A user-assigned name for the deployment, for example "Acme web server"
 =item description
 
 A user-assigned description for the deployment, for example "Site www.acme.com"
+
+=item deleted_at
+
+The date and time the cluster was deleted
 
 =item status
 
@@ -86,6 +90,7 @@ $VERSION = "1.0";
 use strict;
 use base 'Models::Object';
 use Constants::AWS;
+use Utils::Time;
 {
     # Class static properties
 
@@ -112,7 +117,7 @@ sub connect
         $args{host} = $ENV{BACKUP_SERVER};
         $_Connection = $class->SUPER::connect(%args);
     }
-    $class->fields(qw(account_id deployment_id instances_max instances_min run_hours_max run_hours_min load_too_high load_too_low process_name proc_too_many proc_too_few is_balanced name description status));
+    $class->fields(qw(account_id deployment_id instances_max instances_min run_hours_max run_hours_min load_too_high load_too_low process_name proc_too_many proc_too_few pound_file name description deleted_at status));
 
     return $_Connection;
 }
@@ -168,7 +173,7 @@ sub soft_delete
 
 =head1 DEPENDENCIES
 
-Models::Object, Constants::AWS
+Models::Object, Constants::AWS, Utils::Time
 
 =head1 AUTHOR
 
