@@ -1,0 +1,90 @@
+#!/usr/bin/env perl
+
+# This file simply sets up a customer account holder for testing
+# by providing the single function "setup()", returning both the
+# customer and account objects afer inserting into the database.
+
+use strict;
+use warnings;
+
+use Constants::AWS;
+use Models::Customer;
+use Models::Account;
+
+sub setup
+{
+    # Connect to the database
+
+    Models::Customer->connect();
+    Models::Account->connect();
+
+    # Delete any old customer account
+
+    Models::Customer->sql("delete from customers");
+    Models::Account->sql("delete from accounts");
+
+    # Make a fake customer for testing
+
+    my $customer = {
+        contact         => 'Administrator',
+        company         => 'Customer',
+        street1         => '1 Main Street',
+        city            => 'Cloudville',
+        country         => 'USA',
+        url             => 'www.customer.com',
+        brand           => 'Customer',
+        email           => 'support@customer.com',
+        aws_account_num => '1234',
+        max_addresses   => 1,
+        max_instances   => 1,
+        max_snapshots   => 1,
+        max_volumes     => 3,
+    };
+    $customer = Models::Customer->new(%{$customer});
+    $customer->insert();
+
+    # Make a fake AWS keys file for testing
+
+    $ENV{KEYS_DIR} = '/tmp';
+    my $keys_file = "/tmp/customer$customer->{id}.keys";
+    open (KEYS_FILE, ">$keys_file");
+    print KEYS_FILE "1234\n";
+    print KEYS_FILE "5678\n";
+    close KEYS_FILE;
+    chmod 0600, $keys_file;
+
+    # Make a fake account for testing
+
+    my $account = {
+        customer_id     => $customer->{id},
+        parent_id       => 0,
+        status          => Constants::AWS::STATUS_ACTIVE,
+        start_date      => '2008-12-01',
+        name            => 'name',
+        email           => 'email@domain.com',
+        phone           => '123-1234-5678',
+        username        => 'username',
+        password        => 'password',
+    };
+    $account = Models::Account->new(%{$account});
+    $account->insert();
+
+    return ($customer, $account);
+}
+
+# Remove any fake AWS keys files for testing
+
+sub clean
+{
+    opendir (TMP, '/tmp');
+    my @files = readdir(TMP);
+    closedir TMP;
+
+    foreach my $file (@files)
+    {
+        unlink "/tmp/$file" if $file =~ /customer\d+\.keys/;
+    }
+}
+
+1;
+__END__
