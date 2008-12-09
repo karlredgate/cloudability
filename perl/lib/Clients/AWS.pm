@@ -29,6 +29,8 @@ $VERSION = "1.0";
 use strict;
 use Constants::AWS;
 use Clients::Quota;
+use Models::Customer;
+use Models::Account;
 use Models::Address;
 use Models::Image;
 use Models::Instance;
@@ -46,22 +48,21 @@ use Utils::LogFile;
 
 =over 4
 
-=item new([$aws_owner_id])
+=item new($account_id)
 
-Create a new Clients::AWS object for an Amazon AWS owner ID (e.g. 992046831893)
+Create a new Clients::AWS object for an account ID
 
 =cut
 sub new
 {
-    my ($class, $aws_owner_id) = @_;
-    $aws_owner_id ||= $ENV{AWS_OWNER_ID};
-    die "no AWS owner ID specified" unless $aws_owner_id;
+    my ($class, $account_id) = @_;
+    die "no account ID" unless $account_id;
 
     # Make a new Clients::AWS object
 
     my $self = {
-        aws_owner_id    => $aws_owner_id,
-        account_id      => 0, # see the command() method below
+        customer        => $class->get_customer($account_id),
+        account_id      => $account_id,
         deployment_id   => 0, # see the command() method below
         log_file        => Utils::LogFile->new("$ENV{LOGS_DIR}/aws"),
     };
@@ -69,6 +70,33 @@ sub new
     # Return the new Clients::AWS object
 
     bless $self, $class;
+}
+
+=item get_customer($account_id)
+
+Get the customer for an account ID
+
+=cut
+sub get_customer
+{
+    my ($class, $account_id) = @_;
+
+    # Get the account
+
+    Models::Account->connect();
+    my $account = Models::Account->row($account_id);
+    die "no account with ID $account_id" unless $account->{id};
+
+    # Get the custoemr
+
+    my $customer_id = $account->{customer_id} or die "no customer ID";
+    Models::Customer->connect();
+    my $customer = Models::Customer->row($customer_id);
+    die "no customer with ID $customer_id" unless $customer->{id};
+
+    # Return the customer
+
+    return $customer;
 }
 
 =item set_aws_command($aws_command)
@@ -88,19 +116,18 @@ sub set_aws_command
 
 =over 4
 
-=item command($cmd, [$account_id], [$deployment_id])
+=item command($cmd, [$deployment_id])
 
 Run an AWS command and parse the results
 
 =cut
 sub command
 {
-    my ($self, $cmd, $account_id, $deployment_id) = @_;
+    my ($self, $cmd, $deployment_id) = @_;
     die "bad command \"$cmd\"" if $cmd =~ /;|&|\||`|>|</; # no ";&|`><" allowed
     $self->{log_file}->info("Command $cmd");
-    $self->{account_id} = $account_id || 0;
     $self->{deployment_id} = $deployment_id || 0;
-    my $quota = Clients::Quota->new($account_id);
+    my $quota = Clients::Quota->new($self->{account_id});
 
     my $objects = [];
     if ($cmd =~ /^(allad|allocate-address)/)
@@ -187,17 +214,28 @@ sub sync_with_aws
     my ($self) = @_;
     $self->{log_file}->info("Synchronizing images, instances, snapshots and volumes");
 
-    my $images = $self->parse_aws_command('dim -o ' . $self->{aws_owner_id});
+    # Sync images
+
+    my $owner_id = $self->{customer}{aws_account_num} or die "no owner ID";
+    my $images = $self->parse_aws_command("dim -o $owner_id", 'imageId');
     $self->sync_images($images);
+
+    # Sync addresses
 
     my $addresses = $self->parse_aws_command('dad', 'publicIp');
     $self->sync_addresses($addresses);
 
+    # Sync running instances
+
     my $instances = $self->parse_aws_command('din', 'instanceId');
     $self->sync_instances($instances);
 
+    # Sync snapshots
+
     my $snapshots = $self->parse_aws_command('dsnap', 'snapshotId');
     $self->sync_snapshots($snapshots);
+
+    # Sync volumes
 
     my $volumes = $self->parse_aws_command('dvol', 'volumeId');
     $self->sync_volumes($volumes);
@@ -213,12 +251,20 @@ sub parse_aws_command
     my ($self, $cmd, $header) = @_;
     $header ||= '';
 
+    # Add the secrets file to the AWS command
+
+    my $customer_id = $self->{customer}{id};
+    my $keys_file = "$ENV{KEYS_DIR}/customer$customer_id.keys";
+    die "no AWS keys file $keys_file for customer $customer_id"
+                                          unless -f $keys_file;
+    my $aws_command = "$_AWS_COMMAND --secrets-file=$keys_file";
+
     # Run the AWS command to read data from Amazon
 
-    open (AWS, "$_AWS_COMMAND $cmd|");
+    open (AWS, "$aws_command $cmd|");
     my @data = grep /^[^+]/, <AWS>;
     close AWS;
-    $self->{log_file}->info("Ran \"$_AWS_COMMAND $cmd\" and received:\n" .
+    $self->{log_file}->info("Ran \"$aws_command $cmd\" and received:\n" .
                             join('', @data));
 
     # Parse the first line as a header line always
@@ -487,7 +533,7 @@ sub sync_volumes
 
 =head1 DEPENDENCIES
 
-Constants::AWS, Clients::Quota, Models::Image, Models::Instance, Models::Snapshot, Models::Volume, Utils::Time, Utils::LogFile
+Constants::AWS, Clients::Quota, Models::Customer, Models::Account, Models::Image, Models::Instance, Models::Snapshot, Models::Volume, Utils::Time, Utils::LogFile
 
 =head1 AUTHOR
 

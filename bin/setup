@@ -8,9 +8,11 @@ setup - set up a new Cloudability system with a new system administrator
 
 Use this program to set up a new Cloudability system with an administrator.
 
-setup
+setup [options]
 
- Options: None
+ Options
+  -database=test  setup a customer account holder in the test database
+  -help or -?     display this help message
 
 =head1 DESCRIPTION
 
@@ -28,11 +30,25 @@ BEGIN {
 
 use lib "$ENV{CLOUDABILITY_HOME}/perl/lib";
 use Term::ReadLine;
+use Constants::AWS;
 use Models::Customer;
 use Models::Account;
 use Utils::Time;
 
 use constant REQUIRED => 1;
+
+# Get command line options
+
+use Getopt::Long;
+use Pod::Usage;
+my ($database, $help);
+GetOptions("database:s" => \$database,
+           "help|?"     => \$help) or pod2usage(2);
+pod2usage(1) if $help;
+
+# Optionally set the database for development or testing
+
+$ENV{DB_DATABASE} .= "_$database" if $database =~ /^(dev|test)$/;
 
 # Let's make it look pretty...
 
@@ -68,9 +84,9 @@ my $cust_tax_number = ask_for "Customer's tax number";
 my $cust_url = ask_for "Customer's web site address (URL)";
 my $cust_email = ask_for "Customer's main email address";
 my $cust_brand = ask_for "Customer's brand name";
-my $cust_aws_access_key = ask_for "Amazon AWS access key";
-my $cust_aws_secret_key = ask_for "Amazon AWS secret access key";
-my $cust_aws_account_num = ask_for "Amazon AWS account number, e.g. 1234-2345-3456";
+my $cust_aws_access_key = ask_for "Amazon AWS access key", REQUIRED;
+my $cust_aws_secret_key = ask_for "Amazon AWS secret access key", REQUIRED;
+my $cust_aws_account_num = ask_for "Amazon AWS account number, e.g. 1234-2345-3456", REQUIRED;
 my $max_addresses = ask_for "Maximum number of IP addresses" || 0;
 my $max_instances = ask_for "Maximum number of instances" || 0;
 my $max_snapshots = ask_for "Maximum number of snapshots" || 0;
@@ -103,8 +119,6 @@ my $customer = Models::Customer->new(
     url             => $cust_url,
     email           => $cust_email,
     brand           => $cust_brand,
-    aws_access_key  => $cust_aws_access_key,
-    aws_secret_key  => $cust_aws_secret_key,
     aws_account_num => $cust_aws_account_num,
     max_addresses   => $max_addresses,
     max_instances   => $max_instances,
@@ -113,10 +127,21 @@ my $customer = Models::Customer->new(
 );
 $customer->insert();
 
+# Don't store AWS keys in the database - use a keys file instead:
+
+my $aws_key_file = "$ENV{KEYS_DIR}/customer$customer->{id}.keys";
+open (KEY_FILE, ">$aws_key_file");
+print KEY_FILE "$cust_aws_access_key\n";
+print KEY_FILE "$cust_aws_secret_key\n";
+close KEY_FILE;
+chmod 0600, $aws_key_file; # to keep it secret otherwise "aws" will complain!
+
+# Make a new account holder
+
 my $account = Models::Account->new(
     customer_id     => $customer->{id},
     parent_id       => 0,
-    status          => 'A',
+    status          => Constants::AWS::STATUS_ACTIVE,
     start_date      => Utils::Time->get_date(),
     name            => $name,
     email           => $email,
@@ -125,6 +150,8 @@ my $account = Models::Account->new(
     password        => $password,
 );
 $account->insert();
+
+# All done, so say thanks and clean up
 
 print "Thank you. Setup complete.\n";
 
@@ -137,7 +164,7 @@ __END__
 
 =head1 DEPENDENCIES
 
-Term::ReadLine, Models::Customer, Models::Account, Utils::Time
+Getopt::Long, Pod::Usage, Term::ReadLine, Constants::AWS, Models::Customer, Models::Account, Utils::Time
 
 =head1 AUTHOR
 

@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Test::More tests => 4;
+use Constants::AWS;
 use Clients::Quota;
 use Models::Customer;
 use Models::Account;
@@ -52,7 +53,7 @@ $customer->insert();
 my $account = {
     customer_id     => $customer->{id},
     parent_id       => 0,
-    status          => 'A',
+    status          => Constants::AWS::STATUS_ACTIVE,
     start_date      => '2008-12-01',
     name            => 'name',
     email           => 'email@domain.com',

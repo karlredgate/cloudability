@@ -70,14 +70,6 @@ The customer's customer service email address
 
 The customer's service brand name
 
-=item aws_access_key
-
-The customer's AWS access key
-
-=item aws_secret_key
-
-The customer's AWS secret key
-
 =item aws_account_num
 
 The customer's AWS account number (typically "nnnn-nnnn-nnnn")
@@ -140,7 +132,7 @@ sub connect
         $args{host} = $ENV{BACKUP_SERVER};
         $_Connection = $class->SUPER::connect(%args);
     }
-    $class->fields(qw(contact company street1 street2 city country zip_code tel_number fax_number tax_number url email brand aws_access_key aws_secret_key aws_account_num aws_cert_name aws_cert_text max_addresses max_instances max_snapshots max_volumes));
+    $class->fields(qw(contact company street1 street2 city country zip_code tel_number fax_number tax_number url email brand aws_account_num aws_cert_name aws_cert_text max_addresses max_instances max_snapshots max_volumes));
 
     return $_Connection;
 }

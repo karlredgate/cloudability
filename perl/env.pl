@@ -3,14 +3,15 @@
 use warnings;
 use Sys::Hostname;
 
-$ENV{AWS_OWNER_ID}    = '992046831893'; # TODO: Change this to your AWS owner ID
-$ENV{AWS_KEY_FILE}    = '~/.ssh/c10y-keypair.pem'; # TODO: Change to your key
+$ENV{MASTER_SERVER}   = 'localhost';
+$ENV{BACKUP_SERVER}   = 'localhost';
 $ENV{DB_USER}         = 'root';
 $ENV{DB_PASSWORD}     = '';
 $ENV{DB_DATABASE}     = 'c10y';
 $ENV{HOSTNAME}        = hostname();
-$ENV{LOGGING_LEVEL}   ||= 2; # info and above
+$ENV{LOGGING_LEVEL}   ||= 2; # info and above, unless already set by the user
+$ENV{WEB_DIR}         = "$ENV{CLOUDABILITY_HOME}/web";
 $ENV{LOGS_DIR}        = "$ENV{CLOUDABILITY_HOME}/logs";
+$ENV{KEYS_DIR}        = "$ENV{CLOUDABILITY_HOME}/keys";
+$ENV{POUND_DIR}       = "$ENV{CLOUDABILITY_HOME}/pound";
 $ENV{DEPLOY_DIR}      = "$ENV{CLOUDABILITY_HOME}/deploy";
-$ENV{MASTER_SERVER}   ||= 'localhost';
-$ENV{BACKUP_SERVER}   ||= 'localhost';

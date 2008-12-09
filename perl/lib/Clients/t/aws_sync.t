@@ -11,6 +11,11 @@ use Models::Instance;
 use Models::Snapshot;
 use Models::Volume;
 
+# Setup a customer account holder for testing
+
+require "$ENV{CLOUDABILITY_HOME}/perl/lib/Clients/t/setup";
+my ($customer, $account) = setup();
+
 # Set-up some test objects to check the results
 
 my $images = {
@@ -72,8 +77,8 @@ my $volumes = {
 
 # Set the AWS object to use the "aws_mock" test command to read our "out" files
 
+my $aws = Clients::AWS->new($account->{id});
 Clients::AWS->set_aws_command("$ENV{CLOUDABILITY_HOME}/perl/lib/Clients/t/aws_mock");
-my $aws = Clients::AWS->new();
 
 # Connect to the database
 
@@ -133,4 +138,5 @@ while (my ($field, $value) = each %{$check})
     is $volume->{$field}, $value, "volume: retrieved $field is $value";
 }
 
+clean();
 __END__
