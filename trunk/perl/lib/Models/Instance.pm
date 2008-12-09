@@ -183,6 +183,7 @@ sub deploy_to_host
     Models::Deployment->connect();
     my $deployment = Models::Deployment->row($self->{deployment_id});
     my $deploy_file = $deployment->{deploy_file} || Constants::AWS::DEPLOY_FILE;
+    my $key_file = $self->key_file();
     open (DEPLOY_FILE, "$ENV{DEPLOY_DIR}/$deploy_file") or die "no deploy file";
     while (my $command = <DEPLOY_FILE>)
     {
@@ -190,7 +191,7 @@ sub deploy_to_host
 
         $command =~ s/INSTANCE/$self->{aws_instance_id}/g;
         $command =~ s/HOST/$self->{aws_public_dns}/g;
-        $command =~ s/KEY/$ENV{AWS_KEY_FILE}/g;
+        $command =~ s/KEY/$key_file/g;
         $command =~ s/AWS/$aws_cmd $self->{account_id}/g;
         $command =~ s/\s*#.*$//; # strip any line comments
 
@@ -212,7 +213,20 @@ sub know_host
     return if $self->{status} ne Constants::AWS::STATUS_RUNNING;
     die "no AWS public DNS host name" unless $self->{aws_public_dns};
 
-    system "$_KNOW_HOST_CMD $ENV{AWS_KEY_FILE} $self->{aws_public_dns} >/dev/null";
+    my $key_file = $self->key_file();
+    system "$_KNOW_HOST_CMD $key_file $self->{aws_public_dns} >/dev/null";
+}
+
+=item key_file()
+
+Return the full file path to the key file for this instance
+
+=cut
+sub key_file
+{
+    my ($self) = @_;
+    my $key_name = $self->{aws_key_name} or die "no 'aws_key_name'";
+    return "$ENV{KEYS_DIR}/$key_name.pem";
 }
 
 }1;

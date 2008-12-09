@@ -17,14 +17,12 @@ my %object = (
     url             => 'url',
     email           => 'email',
     brand           => 'brand',
-    aws_access_key  => 'aws_access_key',
-    aws_secret_key  => 'aws_secret_key',
     aws_account_num => 'aws_account_num',
     aws_cert_name   => 'aws_cert_name',
     aws_cert_text   => 'aws_cert_text',
 );
 
-use Test::More tests => 18;
+use Test::More tests => 16;
 use Models::Customer;
 Models::Customer->connect();
 

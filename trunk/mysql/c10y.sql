@@ -33,8 +33,6 @@ create table if not exists customers
     url             VARCHAR(40) NOT NULL,
     email           VARCHAR(40) NOT NULL,
     brand           VARCHAR(40) NOT NULL,
-    aws_access_key  VARCHAR(255),
-    aws_secret_key  VARCHAR(255),
     aws_account_num VARCHAR(255),
     aws_cert_name   VARCHAR(255),
     aws_cert_text   MEDIUMTEXT,

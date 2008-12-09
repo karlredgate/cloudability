@@ -30,8 +30,6 @@ BEGIN {
 use lib "$ENV{CLOUDABILITY_HOME}/perl/lib";
 use Clients::AWS;
 
-my $aws = Clients::AWS->new();
-
 # Get the account ID and command from the command line
 
 my $account_id = shift||0;
@@ -39,7 +37,11 @@ my $cmd = join ' ', @ARGV;
 die "usage: $0 ACCOUNT_ID command" unless $account_id =~ /^\d+$/;
 die "usage: $0 account_id COMMAND" unless $cmd;
 
-# Perform a sync or run a regular "aws" command and read its data
+# Create an AWS wrapper object for an account
+
+my $aws = Clients::AWS->new($account_id);
+
+# Perform a sync, or run a regular "aws" command and read its data
 
 if ($cmd eq 'sync')
 {
@@ -49,7 +51,7 @@ if ($cmd eq 'sync')
 }
 else
 {
-    $aws->command($cmd, $account_id);
+    $aws->command($cmd);
 }
 
 __END__

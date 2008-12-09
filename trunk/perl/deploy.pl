@@ -48,8 +48,8 @@ die "deployment $deployment not found" unless $deploying->{id};
 
 # Run the deployment command
 
-my $aws = Clients::AWS->new();
-$aws->command($deploying->to_aws_command(), $account_id, $deploying->{id});
+my $aws = Clients::AWS->new($account_id);
+$aws->command($deploying->to_aws_command(), $deploying->{id});
 
 __END__
 
