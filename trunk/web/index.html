@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <title>Cloudability</title>
+    <script type="text/javascript" src="scripts/jquery.js"></script>
+    <script type="text/javascript" src="scripts/c10y.js"></script>
+    <script type="text/javascript" src="scripts/c10y.api.js"></script>
+    <script type="text/javascript" src="scripts/c10y.display.js"></script>
+</head>
+<body>
+
+<form method="post" onsubmit="c10y.api.doLogin(this.user.value, this.pass.value); return false">
+<table>
+  <tr>
+    <td>Username</td>
+    <td><input type="text" name="user" value="" size="15"></td>
+  </tr>
+  <tr>
+    <td>Password</td>
+    <td><input type="password" name="pass" value="" size="15"></td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td><input type="submit" name="send" value=" Sign in "></td>
+  </tr>
+</table>
+</form>
+
+<div id="information"></div>
+<div id="addresses"></div>
+<div id="images"></div>
+<div id="instances"></div>
+<div id="snapshots"></div>
+<div id="volumes"></div>
+
+</body>
+</html>

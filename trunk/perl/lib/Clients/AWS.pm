@@ -403,7 +403,8 @@ sub sync_addresses
         my $found = Models::Address->select('aws_public_ip = ?', $address->{aws_public_ip});
         if ($found->{id})
         {
-            # Nothing to do - the only field is the public IP address
+            $self->copy_object($address, $found);
+            $found->update();
         }
         else
         {

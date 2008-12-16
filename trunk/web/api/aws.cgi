@@ -18,9 +18,10 @@ use Clients::AWS::API;
 sub error
 {
     my $message = shift;
-    print "Content-type: text/plain\n\nERROR: $message\n";
+    print "Content-type: text/plain\n\n{\"error\": \"$message\"}\n";
     exit;
 }
+
 # Get the query parameters
 
 my $cgi = new CGI;
@@ -68,7 +69,7 @@ error "sorry, cannot call token '$token_text': $error" if $error;
 
 # Perform an AWS command via the API subclass
 
-my $aws_api = Clients::AWS::API->new();
+my $aws_api = Clients::AWS::API->new($account_id);
 my $output = $aws_api->command( account => $account,
                                 command => $command,
                                 format  => $format,

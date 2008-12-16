@@ -43,18 +43,18 @@ use JSON;
 
 =over 4
 
-=item new([$aws_owner_id])
+=item new($account_id)
 
 Create a new Clients::AWS::API object
 
 =cut
 sub new
 {
-    my ($class, $aws_owner_id) = @_;
+    my ($class, $account_id) = @_;
 
     # Make a new Clients::AWS::API object
 
-    my $self = $class->SUPER::new($aws_owner_id);
+    my $self = $class->SUPER::new($account_id);
 
     # Return the new Clients::AWS::API object
 
@@ -160,12 +160,13 @@ sub format
     my $objects = $args{objects};
     my $object_type = $self->{object_type} || 'object';
 
+    my $plural = $object_type . ($object_type =~ /s$/ ? 'es' : 's');
     my $aws = {
-        "${object_type}s" => { $object_type => $objects },
-        stats => { request     => $request,
-                   command     => $command,
-                   remote_addr => $ENV{HTTP_REMOTE_ADDR},
-                   timestamp   => time() }
+        $plural => { $object_type   => $objects },
+        stats   => { request        => $request,
+                     command        => $command,
+                     remote_addr    => $ENV{HTTP_REMOTE_ADDR},
+                     timestamp      => time() }
     };
 
     if ($format eq 'xml')

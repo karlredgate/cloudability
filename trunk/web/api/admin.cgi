@@ -17,9 +17,10 @@ use Clients::Admin;
 sub error
 {
     my $message = shift;
-    print "Content-type: text/plain\n\nERROR: $message\n";
+    print "Content-type: text/plain\n\n{\"error\": \"$message\"}\n";
     exit;
 }
+
 # Get the query parameters
 
 my $cgi = new CGI;
