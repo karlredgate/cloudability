@@ -26,6 +26,13 @@ c10y.display = {
         volumes: ['aws_volume_id']
     },
 
+    // Display an information message
+
+    inform: function(message, el) {
+        if (!el) el = '#information';
+        $(el).text(message);
+    },
+
     // Update the display of an entity list
  
     update: function(entity) {

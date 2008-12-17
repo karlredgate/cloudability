@@ -5,36 +5,51 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
     <title>Cloudability</title>
+
+    <!-- jQuery -->
     <script type="text/javascript" src="scripts/jquery.js"></script>
+    <script type="text/javascript" src="scripts/jquery/ui.core.js"></script>
+
+    <!-- Tabs -->
+    <link rel="stylesheet" href="styles/ui.tabs.css" type="text/css" media="print, projection, screen" />
+    <script type="text/javascript" src="scripts/jquery/ui.tabs.js"></script>
+
+    <!-- Modal dialogs -->
+    <link rel="stylesheet" href="styles/jqModal.css" type="text/css" media="print, projection, screen" />
+    <script type="text/javascript" src="scripts/jquery/jqModal.js"></script>
+
+    <!-- Cloudability web interface -->
+    <link rel="stylesheet" href="styles/c10y.css" type="text/css" media="print, projection, screen" />
     <script type="text/javascript" src="scripts/c10y.js"></script>
-    <script type="text/javascript" src="scripts/c10y.api.js"></script>
-    <script type="text/javascript" src="scripts/c10y.display.js"></script>
+    <script type="text/javascript" src="scripts/c10y/api.js"></script>
+    <script type="text/javascript" src="scripts/c10y/display.js"></script>
+
+<script type="text/javascript">
+$(function() {
+    $("#tabs > ul").tabs();
+    c10y.init();
+});
+</script>
 </head>
 <body>
 
-<form method="post" onsubmit="c10y.api.doLogin(this.user.value, this.pass.value); return false">
-<table>
-  <tr>
-    <td>Username</td>
-    <td><input type="text" name="user" value="" size="15"></td>
-  </tr>
-  <tr>
-    <td>Password</td>
-    <td><input type="password" name="pass" value="" size="15"></td>
-  </tr>
-  <tr>
-    <td>&nbsp;</td>
-    <td><input type="submit" name="send" value=" Sign in "></td>
-  </tr>
-</table>
-</form>
-
+<div id="dialog" class="jqmWindow" style="display:none"></div>
 <div id="information"></div>
-<div id="addresses"></div>
-<div id="images"></div>
-<div id="instances"></div>
-<div id="snapshots"></div>
-<div id="volumes"></div>
+
+<div id="tabs">
+  <ul>
+    <li><a href="#addresses"><span>Addresses</span></a></li>
+    <li><a href="#images"><span>Images</span></a></li>
+    <li><a href="#instances"><span>Instances</span></a></li>
+    <li><a href="#snapshots"><span>Snapshots</span></a></li>
+    <li><a href="#volumes"><span>Volumes</span></a></li>
+  </ul>
+  <div id="addresses"></div>
+  <div id="images"></div>
+  <div id="instances"></div>
+  <div id="snapshots"></div>
+  <div id="volumes"></div>
+</div>
 
 </body>
 </html>
