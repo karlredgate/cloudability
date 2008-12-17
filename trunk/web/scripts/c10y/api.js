@@ -2,6 +2,16 @@
 
 c10y.api = {
 
+    // Refresh the entity lists
+
+    refresh: function() {
+        c10y.api.doAWS('dad'); // addresses
+        c10y.api.doAWS('dim'); // images
+        c10y.api.doAWS('din'); // instances
+        c10y.api.doAWS('dsnap'); // snapshots
+        c10y.api.doAWS('dvol'); // volumes
+    },
+
     // Login to get an API token
 
     doLogin: function(username, password) {
@@ -28,13 +38,10 @@ c10y.api = {
 
             // Update our AWS resources
 
-            c10y.api.doAWS('dad'); // addresses
-            c10y.api.doAWS('dim'); // images
-            c10y.api.doAWS('din'); // instances
-            c10y.api.doAWS('dsnap'); // snapshots
-            c10y.api.doAWS('dvol'); // volumes
+            c10y.api.refresh();
+
         } catch(message) {
-            c10y.inform(message);
+            c10y.display.inform(message, '#loginError');
         }
     },
 
@@ -62,7 +69,7 @@ c10y.api = {
             if (data.snapshots) c10y.api.update('snapshots', data.snapshots.snapshot);
             if (data.volumes) c10y.api.update('volumes', data.volumes.volume);
         } catch(message) {
-            c10y.inform(message);
+            c10y.display.inform(message);
         }
     },
 
