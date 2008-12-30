@@ -12,7 +12,7 @@ var AWS = {
 
 var c10y = {
 
-    INTERVAL: 1000, // milliseconds
+    INTERVAL: 500, // milliseconds
     TIMEOUT: 5000, // milliseconds
     username: '',
     token: '',
@@ -31,7 +31,7 @@ var c10y = {
             timeout: c10y.TIMEOUT,
             dataType: 'json',
             error: function(xhr) {
-                $('#information').text('Error: ' + xhr.status + ' ' + xhr.statusText);
+                $('#message').text('Error: ' + xhr.status + ' ' + xhr.statusText);
             }
         });
 
