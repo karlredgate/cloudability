@@ -2,3 +2,7 @@ body {
     font-family: "Trebuchet MS", Trebuchet, Verdana, Helvetica, Arial, sans-serif;
     font-size: 12px;
 }
+
+tr {
+    vertical-align: top;
+}
