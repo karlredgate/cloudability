@@ -217,6 +217,7 @@ sub sync_with_aws
     # Sync images
 
     my $owner_id = $self->{customer}{aws_account_num} or die "no owner ID";
+    $owner_id =~ s/-//g; # to remove slashes from a number like "1234-1234-1234"
     my $images = $self->parse_aws_command("dim -o $owner_id", 'imageId');
     $self->sync_images($images);
 
