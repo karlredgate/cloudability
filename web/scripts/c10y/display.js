@@ -33,7 +33,7 @@ c10y.display = {
         images: '<p>Amazon machine images available to run</p>',
         instances: '<p>Running instances of Amazon machine images</p>',
         snapshots: '<p>Snapshots of storage volumes</p>',
-        volumes: '<p>Storage volumes to attach to running instances</p>',
+        volumes: '<p>Storage volumes to attach to running instances</p>'
     },
 
     // List the fields shown for each entity
